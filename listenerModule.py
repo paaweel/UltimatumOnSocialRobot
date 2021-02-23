@@ -3,12 +3,17 @@
 import string
 import random
 
+import io
 import qi
 import sys
 import naoqi
 
 import numpy as np
 import time
+
+from google.cloud import speech
+from google.cloud.speech import enums
+from google.cloud.speech import types
 from audioSessionManager import AudioSessionManager
 
 # Constant to send to the ALAudiodevice and use to compute the pitch based on the fft
@@ -40,59 +45,21 @@ class ListenerModule:
         print(data)
         return data
 
-    def getAudio(self, timeout=1):
-        with AudioSessionManager(self.session, timeout * 10) as stream:
-            content = [content.tobytes() for content in stream.data()]
-            return content
 
-    def __enter__(self):
-        print("Starting listening session")
-        self.audio_service.setClientPreferences(self.module_name, SAMPLE_RATE, 3, 0)
-        self.audio_service.subscribe(self.module_name)
-        self.isProcessingDone = False
-        return self
+    def run(self):
+        with AudioSessionManager(self.session) as stream:
+            audio_generator = stream.generator()
 
-
-    def __exit__(self, type, value, traceback):
-        print("Processing finished")
-        self.audio_service.unsubscribe(self.module_name)
-        self.isProcessingDone = True
-        self._buff.put(None)
-
-
-    def processRemote(self, nbOfChannels, nbOfSamplesByChannel, timeStamp, inputBuffer):
-        if (self.framesCount <= self.nbOfFramesToProcess):
-            print("Processing remote, frame count: " + str(self.framesCount))
-            self.framesCount = self.framesCount + 1
-            self._buff.put(inputBuffer)
-        else :
-            self.isProcessingDone=True
-
-
-    def data(self):
-        print("return data")
-        chunk = self._buff.get()
-        if chunk is None:
-            return
-
-        data = np.frombuffer(chunk, np.int16)
-        # Now consume whatever other data's still buffered.
-        while True:
-            try:
-                chunk = self._buff.get(block=False)
-                if chunk is None:
-                    return
-                data = np.concatenate((data, np.frombuffer(chunk, np.int16)), axis=None)
-            except queue.Empty:
-                break
-
-        return data
+            requests = (types.StreamingRecognizeRequest(audio_content=content.tobytes())
+                        for content in audio_generator)
+            for i in requests:
+                print(i)
 
 def main():
     """ Main entry point
     """
     listener = ListenerModule()
-    listener.listen()
+    listener.run()
 
 if __name__ == "__main__":
     main()

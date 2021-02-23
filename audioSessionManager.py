@@ -3,49 +3,57 @@ from six.moves import queue
 import random
 import numpy as np
 
+import string
+import random
+import types
+RATE = 16000
+
 class AudioSessionManager(object):
     """Manages audio session with the robot"""
-    RATE = 16000
 
-    def __init__(self, session, nFrames):
+
+    def __init__(self, session):
         super(AudioSessionManager, self).__init__()
-        self._buff = queue.Queue()
+        self.audio_service = session.service("ALAudioDevice")
+        self.module_name = ''.join([random.choice(string.ascii_letters) for n in xrange(32)])
+        session.registerService(self.module_name, self)
+        # Get the service ALAudioDevice.
+
         self.isProcessingDone = True
-        self.nbOfFramesToProcess = nFrames
+        self.nbOfFramesToProcess = 20
         self.framesCount = 0
         self.micFront = []
-        self.session = session
-        self.audio_service = self.session.service("ALAudioDevice")
-        self.module_name = "SoundProcessingModule" + str(random.randint(0, 10000))
-        print("Service is registered")
-        session.registerService(self.module_name, self)
-
+        # self.module_name = Microphone.__class__.__name__
+        self._buff = queue.Queue()
 
     def __enter__(self):
-        print("Starting listening session")
-        self.audio_service.setClientPreferences(self.module_name, AudioSessionManager.RATE, 3, 0)
+        self.audio_service.setClientPreferences(self.module_name, RATE, 3, 0)
         self.audio_service.subscribe(self.module_name)
         self.isProcessingDone = False
         return self
 
-
     def __exit__(self, type, value, traceback):
-        print("Processing finished")
         self.audio_service.unsubscribe(self.module_name)
         self.isProcessingDone = True
         self._buff.put(None)
 
+    def startProcessing(self):
+        """
+        Start processing
+        """
+        # ask for the front microphone signal sampled at 16kHz
+        self.audio_service.setClientPreferences(self.module_name, RATE, 3, 0)
+        self.audio_service.subscribe(self.module_name)
+        self.isProcessingDone = False
+
+        while not self.isProcessingDone:
+            time.sleep(0.5)
+
 
     def processRemote(self, nbOfChannels, nbOfSamplesByChannel, timeStamp, inputBuffer):
-        print(self.framesCount, self.nbOfFramesToProcess, self.isProcessingDone)
-        if (self.framesCount <= self.nbOfFramesToProcess):
-            self.framesCount = self.framesCount + 1
-            self._buff.put(inputBuffer)
-        else :
-            self.isProcessingDone=True
+        self._buff.put(inputBuffer)
 
-    def data(self):
-        print("Generating data")
+    def generator(self):
         while not self.isProcessingDone:
             # Use a blocking get() to ensure there's at least one chunk of
             # data, and stop iteration if the chunk is None, indicating the

@@ -7,7 +7,7 @@ import io
 import qi
 import sys
 import naoqi
-
+import collections
 import time
 
 from google.cloud import speech
@@ -31,28 +31,22 @@ class ListenerModule:
         try:
             self.session.connect("tcp://" + NAO_IP)
             print("Robot connected to listening_module.")
+            bytesBufforSize = 50
+            self.bytesBuffor = collections.deque(bytesBufforSize*[0], bytesBufforSize)
         except RuntimeError:
             print ("Can't connect to Naoqi at ip \"" + NAO_IP)
 
-    def listen(self, timeout=1):
-        """
-        Collect microphones' output for timeout [s]
-        """
-        print("about to listen")
-        data = self.getAudio(timeout)
-        print("done")
-        print(data)
-        return data
-
-
     def run(self):
         with AudioSessionManager(self.session) as stream:
-            audio_generator = stream.generator()
-
-            requests = (types.StreamingRecognizeRequest(audio_content=content.tobytes())
+            try:
+                audio_generator = stream.generator()
+                requests = (types.StreamingRecognizeRequest(audio_content=content.tobytes())
                         for content in audio_generator)
-            for i in requests:
-                print(i)
+                for audioBytes in requests:
+                    self.bytesBuffor.appendleft(audioBytes)
+            except KeyboardInterrupt:
+                print("Got exit signal. Stop listening.")
+                return
 
 def main():
     """ Main entry point

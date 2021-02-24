@@ -8,7 +8,6 @@ import qi
 import sys
 import naoqi
 
-import numpy as np
 import time
 
 from google.cloud import speech

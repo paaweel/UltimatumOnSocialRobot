@@ -9,11 +9,15 @@ import types
 RATE = 16000
 
 class AudioSessionManager(object):
-    """Manages audio session with the robot"""
-
+    """
+    A simple get signal from the front microphone of Nao & calculate its rms power.
+    It requires numpy.
+    """
 
     def __init__(self, session):
-        super(AudioSessionManager, self).__init__()
+        """
+        Initialise services and variables.
+        """
         self.audio_service = session.service("ALAudioDevice")
         self.module_name = ''.join([random.choice(string.ascii_letters) for n in xrange(32)])
         session.registerService(self.module_name, self)
@@ -49,8 +53,10 @@ class AudioSessionManager(object):
         while not self.isProcessingDone:
             time.sleep(0.5)
 
+        self.audio_service.unsubscribe(self.module_name)
 
     def processRemote(self, nbOfChannels, nbOfSamplesByChannel, timeStamp, inputBuffer):
+
         self._buff.put(inputBuffer)
 
     def generator(self):
@@ -74,3 +80,17 @@ class AudioSessionManager(object):
                     break
 
             yield data
+
+
+if __name__ == '__main__':
+    session = qi.Session()
+    ip = '192.168.0.28'
+    port = '9559'
+    try:
+        session.connect("tcp://" + ip + ":" + port)
+    except RuntimeError:
+        print ("Can't connect to Naoqi at ip \"" + ip + "\" on port " + port + ".\n"
+                                                                               "Please check your script arguments. Run with -h option for help.")
+        sys.exit(1)
+    mic = AudioSessionManager(session)
+    mic.__exit__(None, None, None)

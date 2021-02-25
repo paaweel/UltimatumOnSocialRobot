@@ -24,7 +24,7 @@ class AudioSessionManager(object):
         # Get the service ALAudioDevice.
 
         self.isProcessingDone = True
-        self.nbOfFramesToProcess = 20
+        self.nbOfFramesToProcess = 10
         self.framesCount = 0
         self.micFront = []
         # self.module_name = Microphone.__class__.__name__
@@ -52,11 +52,9 @@ class AudioSessionManager(object):
 
         while not self.isProcessingDone:
             time.sleep(0.5)
-
         self.audio_service.unsubscribe(self.module_name)
 
     def processRemote(self, nbOfChannels, nbOfSamplesByChannel, timeStamp, inputBuffer):
-
         self._buff.put(inputBuffer)
 
     def generator(self):
@@ -78,7 +76,6 @@ class AudioSessionManager(object):
                     data = np.concatenate((data, np.frombuffer(chunk, np.int16)), axis=None)
                 except queue.Empty:
                     break
-
             yield data
 
 

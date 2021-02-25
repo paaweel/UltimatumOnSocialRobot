@@ -11,12 +11,12 @@ from google.cloud.speech import enums
 from google.cloud.speech import types
 
 import collections
+import zmq
+import zlib, cPickle as pickle
 
 from audioSessionManager import AudioSessionManager
 RATE = 16000
 
-def _json_object_hook(d): return namedtuple('X', d.keys())(*d.values())
-def json2obj(data): return json.loads(data, object_hook=_json_object_hook)
 
 class ListenerModule(object):
 
@@ -35,14 +35,21 @@ class ListenerModule(object):
         bytesBufforSize = 50
         self.bytesBuffor = collections.deque(bytesBufforSize*[0], bytesBufforSize)
         self.transcriptBuffor = collections.deque(bytesBufforSize*[0], bytesBufforSize)
+        self.context = zmq.Context()
+        self.transcript_socket = self.context.socket(zmq.PUSH)
+        self.transcript_socket.setsockopt(zmq.SNDHWM, 1)
+        self.transcript_socket.bind("tcp://127.0.0.1:5557")
+
+        self.audio_socket = self.context.socket(zmq.PUSH)
+        self.audio_socket.setsockopt(zmq.SNDHWM, 1)
+        self.audio_socket.bind("tcp://127.0.0.1:5558")
 
     def save_to_buffer(self, requests):
         for req in requests:
             self.bytesBuffor.appendleft(req)
             yield req
 
-    def run(self, buffor):
-        self.transcriptBuffor = buffor
+    def run(self):
         try:
             with AudioSessionManager(self.session) as stream:
                 audio_generator = stream.generator()
@@ -53,7 +60,7 @@ class ListenerModule(object):
                 responses = self.client.streaming_recognize(self.streaming_config, self.save_to_buffer(requests))
                 self.listen_print_loop(responses, stream, file)
         except KeyboardInterrupt:
-            print("Exit signal was sent.", self.transcriptBuffor)#, self.bytesBuffor)
+            print("Exit signal was sent.")#, self.bytesBuffor)
 
     def listen_print_loop(self, responses, mod, file):
         """Iterates through server responses and prints them.
@@ -70,15 +77,6 @@ class ListenerModule(object):
         num_chars_printed = 0
         counter = 0
         for response in responses:
-            t = currentThread()
-            if not getattr(t, "do_run", True):
-                counter = counter + 1
-                if counter >= 5:
-                    mod.isProcessingDone = True
-                    break
-            if not response.results:
-                continue
-
             # The `results` list is consecutive. For streaming, we only care about
             # the first result being considered, since once it's `is_final`, it
             # moves on to considering the next utterance.
@@ -100,9 +98,12 @@ class ListenerModule(object):
                 num_chars_printed = len(transcript)
             else:
                 print(transcript + overwrite_chars)
-                # file.write(transcript)
-                # file.flush()
-                self.transcriptBuffor.appendleft(transcript)
+                transcript_message = { 'transcript' : transcript}
+                self.transcript_socket.send_json(transcript_message)
+                # audio_message = { 'audio' : self.bytesBuffor[0]}
+                p = pickle.dumps(self.bytesBuffor[0], -1)
+                z = zlib.compress(p)
+                self.audio_socket.send(z, flags=0)
                 # Exit recognition if any of the transcribed phrases could be
                 # one of our keywords.
                 if re.search(r'\b(exit|quit)\b', transcript, re.I):
@@ -126,13 +127,3 @@ if __name__ == '__main__':
         sys.exit(1)
     listener = ListenerModule(session)
     listener.run()
-    # transcriptTh = Thread(target=listener.run_transcriptor)
-    # audioTh = Thread(target=listener.run_listener)
-    # transcriptTh.start()
-    # audioTh.start()
-    # time.sleep(10)
-    # transcriptTh.do_run = False
-    # audioTh.do_run = False
-    # transcriptTh.join()
-    # audioTh.join()
-    # print(self.transcriptBuffor, self.bytesBuffor)

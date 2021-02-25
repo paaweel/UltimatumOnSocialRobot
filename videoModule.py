@@ -14,7 +14,7 @@ from matplotlib import pyplot as plt
 
 import time
 
-class VideoWrapper:
+class VideoModule:
     def __init__(self, ip="192.168.0.28", port="9559", language="English"):
         # type: (str, str, str) -> None
         self.session = qi.Session()
@@ -29,13 +29,13 @@ class VideoWrapper:
                   + "Run with -h option for help.")
         self.resolution = 2
         # 0: 0.30, 1, 6, 8: 0.45, 2: 0.6, 7: 0.40, 5: 0.40
-        self.colorSpace = 0
+        self.colorSpace = 11
         self.fps = 20
         self.captureFrames = False
         self.client = None
         self.process = Process(target=self.capture)
         self.thread = None
-        self.lastFrames = deque([], maxlen=10)
+        self.lastFrames = deque([], maxlen=3)
 
     def startThread(self):
         self.captureFrames = True
@@ -45,6 +45,7 @@ class VideoWrapper:
 
     def stopThread(self):
         self.captureFrames = False
+        time.sleep(0.5)
         self.thread.join()
 
     def capture(self):
@@ -64,7 +65,7 @@ class VideoWrapper:
         else:
             width = result[0]
             height = result[1]
-            im = np.frombuffer(result[6], np.uint8).reshape((height, width, 1))
+            im = np.frombuffer(result[6], np.uint8).reshape((height, width, 3))
             self.lastFrames.append(im)
 
             while self.captureFrames:
@@ -74,25 +75,10 @@ class VideoWrapper:
                 elif result[6] is None:
                     print 'no image data string.'
                 else:
-                    im = np.frombuffer(result[6], np.uint8).reshape(height, width)
+                    im = np.frombuffer(result[6], np.uint8).reshape(height, width, 3)
+                    # rgb_weights = [0.2989, 0.5870, 0.1140]
+                    # im = np.dot(im[...,:3], rgb_weights)
                     self.lastFrames.append(im)
-
-                    # im.show()
-                    print(len(result[6]))
-
-                    # mode = "RGBA"
-
-                    # data = StringIO.StringIO(im)
-                    # img = Image.open(data)
-                    # print(im)
-
-                    # img = Image.frombytes(im, "RGB")
-                    # d =  np.array(array.array("", result[6])).reshape(height, width)
-                    plt.imshow(im)
-                    plt.show()
-
-                    # img.show()
-
         self.video_service.unsubscribe(self.client)
 
     def getLastFrames(self, n=10):
@@ -111,23 +97,15 @@ class VideoWrapper:
 if __name__ == "__main__":
 
     print("Starting video service!")
-
-    videoWrapper = VideoWrapper()
-
-    videoWrapper.startThread()
-
+    camera = VideoModule()
+    camera.startThread()
     time.sleep(5)
-
-    frames = videoWrapper.getLastFrames()
-
-    # print(frames)
-
-
-    # img = Image.fromarray(frames, "RGB")
-    # img.save("testImage.png")
-    # img.show()
-
+    frames = camera.getLastFrames()
     print("Closing video service")
-
-    videoWrapper.stopThread()
+    camera.stopThread()
     print("Video service finished!")
+
+    for im in camera.lastFrames:
+        plt.imshow(im)
+        plt.show()
+

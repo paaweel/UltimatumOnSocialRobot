@@ -3,15 +3,26 @@ from concurrent.futures import ThreadPoolExecutor, Future
 import sys
 from listenerModule import ListenerModule
 import time
-from threading import Thread
+from multiprocessing import Process
+import zmq
+import random
+import zlib, cPickle as pickle
 
 
-def printBuffor(buff):
-    prevBuff = ""
-    while True:
-        if buff[0] != prevBuff:
-            prevBuff = buff[0]
-            print("Transcript: ", buff[0])
+def receiveTranscript():
+    for i in range(5):
+        transcript = tenscript_receiver.recv_json()
+        data = transcript['transcript']
+        print(data)
+    return
+
+def receiveAudio():
+    for i in range(5):
+        z = audio_receiver.recv(0)
+        p = zlib.decompress(z)
+        audio = pickle.loads(p)
+        print(audio)
+    return
 
 if __name__ == '__main__':
     session = qi.Session()
@@ -25,9 +36,27 @@ if __name__ == '__main__':
                                                                                "Run with -h option for help.")
         sys.exit(1)
 
-    listener = ListenerModule(session)
-    t1 = Thread(target=listener.run, args=(listener.transcriptBuffor, ))
-    t2 = Thread(target=printBuffor, args=(listener.transcriptBuffor, ))
-    t1.start()
-    time.sleep(1)
-    t2.start()
+    consumer_id = random.randrange(1,5)
+    print "I am consumer #%s" % (consumer_id)
+    context = zmq.Context()
+    # recieve work
+    tenscript_receiver = context.socket(zmq.PULL)
+    tenscript_receiver.setsockopt(zmq.RCVHWM, 1)
+    tenscript_receiver.setsockopt(zmq.CONFLATE, 1) # 1 element in queue at a time
+    tenscript_receiver.connect("tcp://127.0.0.1:5557")
+
+    audio_receiver = context.socket(zmq.PULL)
+    audio_receiver.setsockopt(zmq.RCVHWM, 1)
+    audio_receiver.setsockopt(zmq.CONFLATE, 1) # 1 element in queue at a time
+    audio_receiver.connect("tcp://127.0.0.1:5558")
+
+    transcriptProc = Process(target=receiveTranscript)
+    audioProc = Process(target=receiveAudio)
+
+    transcriptProc.start()
+    audioProc.start()
+
+    transcriptProc.join()
+    audioProc.join()
+
+    print("Finish")

@@ -41,9 +41,8 @@ class ListenerModule(object):
             self.bytesBuffor.appendleft(req)
             yield req
 
-    def run(self, name="audiotext.txt"):
-        # a BCP-47 language tag
-        file = io.open(name, 'w')
+    def run(self, buffor):
+        self.transcriptBuffor = buffor
         try:
             with AudioSessionManager(self.session) as stream:
                 audio_generator = stream.generator()
@@ -52,12 +51,9 @@ class ListenerModule(object):
                         for content in audio_generator)
 
                 responses = self.client.streaming_recognize(self.streaming_config, self.save_to_buffer(requests))
-
                 self.listen_print_loop(responses, stream, file)
-
-
         except KeyboardInterrupt:
-            print("Exit signal was sent.", self.transcriptBuffor, self.bytesBuffor)
+            print("Exit signal was sent.", self.transcriptBuffor)#, self.bytesBuffor)
 
     def listen_print_loop(self, responses, mod, file):
         """Iterates through server responses and prints them.

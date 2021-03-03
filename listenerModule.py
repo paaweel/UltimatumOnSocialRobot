@@ -37,11 +37,9 @@ class ListenerModule(object):
         self.transcriptBuffor = collections.deque(bytesBufforSize*[0], bytesBufforSize)
         self.context = zmq.Context()
         self.transcript_socket = self.context.socket(zmq.PUSH)
-        self.transcript_socket.setsockopt(zmq.SNDHWM, 1)
         self.transcript_socket.bind("tcp://127.0.0.1:5557")
 
         self.audio_socket = self.context.socket(zmq.PUSH)
-        self.audio_socket.setsockopt(zmq.SNDHWM, 1)
         self.audio_socket.bind("tcp://127.0.0.1:5558")
 
     def save_to_buffer(self, requests):

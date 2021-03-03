@@ -7,22 +7,44 @@ from multiprocessing import Process
 import zmq
 import random
 import zlib, cPickle as pickle
+from helperModule import *
+from matplotlib import pyplot as plt
 
 
 def receiveTranscript():
-    for i in range(5):
-        transcript = tenscript_receiver.recv_json()
-        data = transcript['transcript']
-        print(data)
-    return
+    try:
+        while True:
+            print("getting transcript")
+            transcript = transcript_receiver.recv_json()
+            data = transcript['transcript']
+            print("Transcript: ", data)
+            time.sleep(0.5)
+    except KeyboardInterrupt:
+        print("Exit signal was sent.")
 
 def receiveAudio():
-    for i in range(5):
-        z = audio_receiver.recv(0)
-        p = zlib.decompress(z)
-        audio = pickle.loads(p)
-        print(audio)
-    return
+    try:
+        while True:
+            print("getting audio")
+            z = audio_receiver.recv(0)
+            p = zlib.decompress(z)
+            audio = pickle.loads(p)
+            print(type(audio))
+            time.sleep(0.5)
+    except KeyboardInterrupt:
+        print("Exit signal was sent.")
+
+def receiveVideo():
+    try:
+        while True:
+            print("receiving video")
+            image_bytes = video_receiver.recv()
+            seqImages = np.frombuffer(image_bytes, dtype='uint8').reshape((3, 480, 640, 3))
+            plt.imshow(seqImages[0], cmap='gray')
+            plt.show()
+            time.sleep(0.5)
+    except KeyboardInterrupt:
+        print("Exit signal was sent.")
 
 if __name__ == '__main__':
     session = qi.Session()
@@ -41,22 +63,27 @@ if __name__ == '__main__':
     context = zmq.Context()
     # recieve work
     transcript_receiver = context.socket(zmq.PULL)
-    transcript_receiver.setsockopt(zmq.RCVHWM, 1)
     transcript_receiver.setsockopt(zmq.CONFLATE, 1) # 1 element in queue at a time
     transcript_receiver.connect("tcp://127.0.0.1:5557")
 
     audio_receiver = context.socket(zmq.PULL)
-    audio_receiver.setsockopt(zmq.RCVHWM, 1)
     audio_receiver.setsockopt(zmq.CONFLATE, 1) # 1 element in queue at a time
     audio_receiver.connect("tcp://127.0.0.1:5558")
 
-    transcriptProc = Process(target=receiveTranscript)
-    audioProc = Process(target=receiveAudio)
+    video_receiver = context.socket(zmq.PULL)
+    video_receiver.setsockopt(zmq.CONFLATE, 1) # 1 element in queue at a time
+    video_receiver.connect("tcp://127.0.0.1:5559")
 
-    transcriptProc.start()
-    audioProc.start()
-
-    transcriptProc.join()
-    audioProc.join()
+    # transcriptProc = Process(target=receiveTranscript)
+    # audioProc = Process(target=receiveAudio)
+    videoProc = Process(target=receiveVideo)
+    #
+    # transcriptProc.start()
+    # audioProc.start()
+    videoProc.start()
+    #
+    # transcriptProc.join()
+    # audioProc.join()
+    videoProc.join()
 
     print("Finish")

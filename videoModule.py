@@ -15,6 +15,8 @@ from matplotlib import pyplot as plt
 import collections
 import zmq
 import time
+from helperModule import *
+
 
 class VideoModule:
     def __init__(self, ip="192.168.0.28", port="9559", language="English"):
@@ -39,7 +41,6 @@ class VideoModule:
         self.thread = None
         self.context = zmq.Context()
         self.video_socket = self.context.socket(zmq.PUSH)
-        self.video_socket.setsockopt(zmq.SNDHWM, 3)
         self.video_socket.bind("tcp://127.0.0.1:5559")
         self.seqFrames = deque([], maxlen=3)
 
@@ -53,10 +54,6 @@ class VideoModule:
         self.captureFrames = False
         time.sleep(0.5)
         self.thread.join()
-
-    def __rgb2gray(self, img):
-        rgb_weights = [0.2989, 0.5870, 0.1140]
-        return np.dot(img[...,:3], rgb_weights)
 
     def capture(self):
         print 'getting images in remote'
@@ -84,12 +81,11 @@ class VideoModule:
                     print 'no image data string.'
                 else:
                     im = np.frombuffer(result[6], np.uint8).reshape(height, width, 3)
-                    gray = self.__rgb2gray(im)
                     self.seqFrames.append(im)
                     sentBuffor = np.array(self.seqFrames)
                     if sentBuffor.shape[0] == 3:
-                        print(gray.shape, im.shape, sentBuffor.shape)
                         self.video_socket.send(sentBuffor)
+                        print("sent")
         self.video_service.unsubscribe(self.client)
 
     def getLastFrames(self, video_receiver):
@@ -102,23 +98,14 @@ class VideoModule:
 
 
 if __name__ == "__main__":
-    context = zmq.Context()
-    video_receiver = context.socket(zmq.PULL)
-    video_receiver.setsockopt(zmq.RCVHWM, 3)
-    video_receiver.setsockopt(zmq.CONFLATE, 1) # 1 element in queue at a time
-    video_receiver.connect("tcp://127.0.0.1:5559")
-
     print("Starting video service!")
     camera = VideoModule()
     camera.startThread()
-    time.sleep(2)
-    frames = camera.getLastFrames(video_receiver)
-    print("Closing video service")
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("Exit signal was sent.")
+
     camera.stopThread()
     print("Video service finished!")
-
-    for im in frames:
-        plt.imshow(im[0])#, cmap='gray')
-        plt.show()
-        plt.imshow(im[2])#, cmap='gray')
-        plt.show()

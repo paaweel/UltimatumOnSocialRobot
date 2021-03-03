@@ -12,6 +12,8 @@ import array
 
 from matplotlib import pyplot as plt
 
+import collections
+import zmq
 import time
 
 class VideoModule:
@@ -35,7 +37,11 @@ class VideoModule:
         self.client = None
         self.process = Process(target=self.capture)
         self.thread = None
-        self.lastFrames = deque([], maxlen=3)
+        self.context = zmq.Context()
+        self.video_socket = self.context.socket(zmq.PUSH)
+        self.video_socket.setsockopt(zmq.SNDHWM, 3)
+        self.video_socket.bind("tcp://127.0.0.1:5559")
+        self.seqFrames = deque([], maxlen=3)
 
     def startThread(self):
         self.captureFrames = True
@@ -47,6 +53,10 @@ class VideoModule:
         self.captureFrames = False
         time.sleep(0.5)
         self.thread.join()
+
+    def __rgb2gray(self, img):
+        rgb_weights = [0.2989, 0.5870, 0.1140]
+        return np.dot(img[...,:3], rgb_weights)
 
     def capture(self):
         print 'getting images in remote'
@@ -65,8 +75,6 @@ class VideoModule:
         else:
             width = result[0]
             height = result[1]
-            im = np.frombuffer(result[6], np.uint8).reshape((height, width, 3))
-            self.lastFrames.append(im)
 
             while self.captureFrames:
                 result = self.video_service.getImageRemote(self.client)
@@ -76,36 +84,41 @@ class VideoModule:
                     print 'no image data string.'
                 else:
                     im = np.frombuffer(result[6], np.uint8).reshape(height, width, 3)
-                    # rgb_weights = [0.2989, 0.5870, 0.1140]
-                    # im = np.dot(im[...,:3], rgb_weights)
-                    self.lastFrames.append(im)
+                    gray = self.__rgb2gray(im)
+                    self.seqFrames.append(im)
+                    sentBuffor = np.array(self.seqFrames)
+                    if sentBuffor.shape[0] == 3:
+                        print(gray.shape, im.shape, sentBuffor.shape)
+                        self.video_socket.send(sentBuffor)
         self.video_service.unsubscribe(self.client)
 
-    def getLastFrames(self, n=10):
-        # it's faster to index a list than a deque collection
-        arr = list(self.lastFrames)[0+(10-n):n]
-        lists = []
-        for frame in arr:
-            lists.append(frame.tolist())
-        json_frames = json.dumps(lists)
-        with open('data' + str(random.randint(0, 4000)) + '.json', 'w') as f:
-            json.dump(json_frames, f)
-
-        return json_frames
+    def getLastFrames(self, video_receiver):
+        frames = []
+        for i in range(1):
+            image_bytes = video_receiver.recv()
+            seqImages = np.frombuffer(image_bytes, dtype='uint8').reshape((3, 480, 640, 3))
+            frames.append(seqImages)
+        return frames
 
 
 if __name__ == "__main__":
+    context = zmq.Context()
+    video_receiver = context.socket(zmq.PULL)
+    video_receiver.setsockopt(zmq.RCVHWM, 3)
+    video_receiver.setsockopt(zmq.CONFLATE, 1) # 1 element in queue at a time
+    video_receiver.connect("tcp://127.0.0.1:5559")
 
     print("Starting video service!")
     camera = VideoModule()
     camera.startThread()
-    time.sleep(5)
-    frames = camera.getLastFrames()
+    time.sleep(2)
+    frames = camera.getLastFrames(video_receiver)
     print("Closing video service")
     camera.stopThread()
     print("Video service finished!")
 
-    for im in camera.lastFrames:
-        plt.imshow(im)
+    for im in frames:
+        plt.imshow(im[0])#, cmap='gray')
         plt.show()
-
+        plt.imshow(im[2])#, cmap='gray')
+        plt.show()

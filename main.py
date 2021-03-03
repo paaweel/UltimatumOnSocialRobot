@@ -40,10 +40,10 @@ if __name__ == '__main__':
     print "I am consumer #%s" % (consumer_id)
     context = zmq.Context()
     # recieve work
-    tenscript_receiver = context.socket(zmq.PULL)
-    tenscript_receiver.setsockopt(zmq.RCVHWM, 1)
-    tenscript_receiver.setsockopt(zmq.CONFLATE, 1) # 1 element in queue at a time
-    tenscript_receiver.connect("tcp://127.0.0.1:5557")
+    transcript_receiver = context.socket(zmq.PULL)
+    transcript_receiver.setsockopt(zmq.RCVHWM, 1)
+    transcript_receiver.setsockopt(zmq.CONFLATE, 1) # 1 element in queue at a time
+    transcript_receiver.connect("tcp://127.0.0.1:5557")
 
     audio_receiver = context.socket(zmq.PULL)
     audio_receiver.setsockopt(zmq.RCVHWM, 1)

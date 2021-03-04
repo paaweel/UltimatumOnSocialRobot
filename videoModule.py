@@ -103,7 +103,7 @@ if __name__ == "__main__":
     camera.startThread()
     try:
         while True:
-            time.sleep(1)
+            time.sleep(0.5)
     except KeyboardInterrupt:
         print("Exit signal was sent.")
 

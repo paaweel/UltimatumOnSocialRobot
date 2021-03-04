@@ -13,6 +13,8 @@ from google.cloud.speech import types
 import collections
 import zmq
 import zlib, cPickle as pickle
+import json
+
 
 from audioSessionManager import AudioSessionManager
 RATE = 16000
@@ -34,7 +36,6 @@ class ListenerModule(object):
         self.session = session
         bytesBufforSize = 50
         self.bytesBuffor = collections.deque(bytesBufforSize*[0], bytesBufforSize)
-        self.transcriptBuffor = collections.deque(bytesBufforSize*[0], bytesBufforSize)
         self.context = zmq.Context()
         self.transcript_socket = self.context.socket(zmq.PUSH)
         self.transcript_socket.bind("tcp://127.0.0.1:5557")
@@ -58,7 +59,7 @@ class ListenerModule(object):
                 responses = self.client.streaming_recognize(self.streaming_config, self.save_to_buffer(requests))
                 self.listen_print_loop(responses, stream, file)
         except KeyboardInterrupt:
-            print("Exit signal was sent.")#, self.bytesBuffor)
+            print("Exit signal was sent.")
 
     def listen_print_loop(self, responses, mod, file):
         """Iterates through server responses and prints them.
@@ -96,12 +97,12 @@ class ListenerModule(object):
                 num_chars_printed = len(transcript)
             else:
                 print(transcript + overwrite_chars)
-                transcript_message = { 'transcript' : transcript}
-                self.transcript_socket.send_json(transcript_message)
-                # audio_message = { 'audio' : self.bytesBuffor[0]}
+                self.transcript_socket.send_string(transcript)
+
                 p = pickle.dumps(self.bytesBuffor[0], -1)
                 z = zlib.compress(p)
                 self.audio_socket.send(z, flags=0)
+
                 # Exit recognition if any of the transcribed phrases could be
                 # one of our keywords.
                 if re.search(r'\b(exit|quit)\b', transcript, re.I):

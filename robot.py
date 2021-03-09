@@ -11,7 +11,6 @@ from multiprocessing import Process
 import zmq
 import zlib, cPickle as pickle
 import numpy as np
-from helperModule import *
 
 class Robot:
     def __init__(self):
@@ -26,29 +25,29 @@ class Robot:
                                                                                    "Run with -h option for help.")
             sys.exit(1)
 
-        context = zmq.Context()
-        self.transcript_receiver = context.socket(zmq.PULL)
-        self.transcript_receiver.setsockopt(zmq.CONFLATE, 1)
-        self.transcript_receiver.connect("tcp://127.0.0.1:5557")
-
-        self.listenerModule = ListenerModule(session)
-
-        # self.transcriptProc = Process(target=self.receiveTranscript)
+        self.transcriptProc = Process(target=self.receiveTranscript)
         self.audioProc = Process(target=self.receiveAudio)
         self.videoProc = Process(target=self.receiveVideo)
 
         self.transcriptData = None
         self.audioData = None
         self.videoData = None
-        self.listenFlag = 'False'
 
     def receiveTranscript(self):
-        print("starting listen service")
-        self.listenerModule.listen_on_request()
-        print("getting transcript")
-        transcript = self.transcript_receiver.recv_string()
-        print("received transcript")
-        return transcript
+        try:
+            context = zmq.Context()
+            transcript_receiver = context.socket(zmq.PULL)
+            transcript_receiver.setsockopt(zmq.CONFLATE, 1)
+            transcript_receiver.connect("tcp://127.0.0.1:5557")
+            while True:
+                print("getting transcript")
+                transcript = transcript_receiver.recv_string()
+                # NOTE
+                # hello = "cześć".decode('utf8') # all commands must be decoded
+                self.transcriptData = transcript
+                print("transcript done", transcript)
+        except KeyboardInterrupt:
+            print("Exit signal was sent.")
 
     def receiveAudio(self):
         try:
@@ -73,7 +72,7 @@ class Robot:
             video_receiver.setsockopt(zmq.CONFLATE, 1)
             video_receiver.connect("tcp://127.0.0.1:5559")
             while True:
-                # print("getting video")
+                print("getting video")
                 image_bytes = video_receiver.recv(0)
                 seqImages = np.frombuffer(image_bytes, dtype='uint8').reshape((3, 480, 640, 3))
                 gray = rgb2gray(seqImages[0])
@@ -85,13 +84,13 @@ class Robot:
             print("Exit signal was sent.")
 
     def start(self):
-        # self.transcriptProc.start()
+        self.transcriptProc.start()
         self.audioProc.start()
         self.videoProc.start()
         print("Opened connection to robot sensors.")
 
     def stop(self):
-        # self.transcriptProc.join()
+        self.transcriptProc.join()
         self.audioProc.join()
         self.videoProc.join()
         print("Closed connection to robot sensors.")

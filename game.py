@@ -36,12 +36,23 @@ class UltimatumGame:
         self.robotPlayer.start()
         self.speaker = SpeakerModule()
 
+    def __getTranscript(self, skippedText, trials=10):
+        for i in range(trials):
+            transcript = self.robotPlayer.transcriptData
+            print(transcript)
+            time.sleep(0.5)
+            # if transcript is None or skippedText in transcript:
+            #     print("zle:", transcript)
+            #     time.sleep(0.5)
+            #     continue
+            # else:
+            #     print("dobre:", transcript)
+            #     return transcript
+
     def __game_offer(self):
         self.speaker.say("Cześć, chcesz zagrać w grę?")
         time.sleep(5)
-        transcript = self.robotPlayer.receiveTranscript()
-        print(transcript)
-        return transcript
+        return self.__getTranscript(skippedText="chcesz zagrać w grę")
 
     def __game_intro(self):
         self.speaker.say("Podaj swoją propozycję")

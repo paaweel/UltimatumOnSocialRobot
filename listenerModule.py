@@ -48,11 +48,20 @@ class ListenerModule(object):
             self.bytesBuffor.appendleft(req)
             yield req
 
+    def listen_on_request(self):
+        with AudioSessionManager(self.session) as stream:
+            audio_generator = stream.generator()
+            requests = (types.StreamingRecognizeRequest(audio_content=content.tobytes())
+                    for content in audio_generator)
+
+            responses = self.client.streaming_recognize(self.streaming_config, self.save_to_buffer(requests))
+            self.listen_print_loop(responses, stream, file)
+            return
+
     def run(self):
         try:
             with AudioSessionManager(self.session) as stream:
                 audio_generator = stream.generator()
-
                 requests = (types.StreamingRecognizeRequest(audio_content=content.tobytes())
                         for content in audio_generator)
 
@@ -79,6 +88,8 @@ class ListenerModule(object):
             # The `results` list is consecutive. For streaming, we only care about
             # the first result being considered, since once it's `is_final`, it
             # moves on to considering the next utterance.
+            if len(response.results) == 0:
+                continue
             result = response.results[0]
             if not result.alternatives:
                 continue

@@ -13,6 +13,7 @@ import zlib, cPickle as pickle
 import json
 from helperModule import *
 from matplotlib import pyplot as plt
+from game import UltimatumGame
 
 
 def receiveTranscript():
@@ -65,27 +66,5 @@ def receiveVideo():
         print("Exit signal was sent.")
 
 if __name__ == '__main__':
-    session = qi.Session()
-    ip = '192.168.0.28'
-    port = '9559'
-    try:
-        session.connect("tcp://" + ip + ":" + port)
-    except RuntimeError:
-        print ("Can't connect to Naoqi at ip \"" + ip + "\" on port " + port + ".\n"
-                                                                               "Please check your script arguments. "
-                                                                               "Run with -h option for help.")
-        sys.exit(1)
-
-    transcriptProc = Process(target=receiveTranscript)
-    audioProc = Process(target=receiveAudio)
-    # videoProc = Process(target=receiveVideo)
-
-    transcriptProc.start()
-    audioProc.start()
-    # videoProc.start()
-
-    transcriptProc.join()
-    audioProc.join()
-    # videoProc.join()
-
-    print("Finish")
+    game = UltimatumGame()
+    game.run()

@@ -11,7 +11,7 @@ class SpeakerModule:
     to facedetection events
 
     """
-    def __init__(self, name):
+    def __init__(self):
         self.session = qi.Session()
         try:
             self.session.connect("tcp://" + NAO_IP)

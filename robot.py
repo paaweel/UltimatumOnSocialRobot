@@ -11,6 +11,7 @@ from multiprocessing import Process
 import zmq
 import zlib, cPickle as pickle
 import numpy as np
+from speakerModule import SpeakerModule
 
 class Robot:
     def __init__(self):
@@ -25,7 +26,14 @@ class Robot:
                                                                                    "Run with -h option for help.")
             sys.exit(1)
 
-        self.transcriptProc = Process(target=self.receiveTranscript)
+        self.speaker = SpeakerModule()
+
+        context = zmq.Context()
+        self.transcript_receiver = context.socket(zmq.PULL)
+        self.transcript_receiver.setsockopt(zmq.CONFLATE, 1)
+        self.transcript_receiver.connect("tcp://127.0.0.1:5557")
+
+        # self.transcriptProc = Process(target=self.receiveTranscript)
         self.audioProc = Process(target=self.receiveAudio)
         self.videoProc = Process(target=self.receiveVideo)
 
@@ -33,21 +41,11 @@ class Robot:
         self.audioData = None
         self.videoData = None
 
+    def say(self, text):
+        self.speaker.say(text)
+
     def receiveTranscript(self):
-        try:
-            context = zmq.Context()
-            transcript_receiver = context.socket(zmq.PULL)
-            transcript_receiver.setsockopt(zmq.CONFLATE, 1)
-            transcript_receiver.connect("tcp://127.0.0.1:5557")
-            while True:
-                print("getting transcript")
-                transcript = transcript_receiver.recv_string()
-                # NOTE
-                # hello = "cześć".decode('utf8') # all commands must be decoded
-                self.transcriptData = transcript
-                print("transcript done", transcript)
-        except KeyboardInterrupt:
-            print("Exit signal was sent.")
+        return self.transcript_receiver.recv_string()
 
     def receiveAudio(self):
         try:
@@ -84,13 +82,13 @@ class Robot:
             print("Exit signal was sent.")
 
     def start(self):
-        self.transcriptProc.start()
+        # self.transcriptProc.start()
         self.audioProc.start()
         self.videoProc.start()
         print("Opened connection to robot sensors.")
 
     def stop(self):
-        self.transcriptProc.join()
+        # self.transcriptProc.join()
         self.audioProc.join()
         self.videoProc.join()
         print("Closed connection to robot sensors.")

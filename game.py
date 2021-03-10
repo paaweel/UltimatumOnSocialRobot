@@ -56,27 +56,30 @@ class UltimatumGame:
 
     def __pepper_offers(self, total):
         proposition = self.player.propose(total)
-        self.robot.say("Proponuję ci " + str(proposition))
+        self.robot.say("Proponuję ci " + str(proposition) + "Czy akceptujesz?")
+        time.sleep(3)
         return proposition
 
     def __ask_player_if_accepts(self, proposition):
-        response = self.humanInterface.ask_yes_no(self.humanInterface.dictionary["ask_if_accepts"])
-        if response == 'yes':
-            self.humanInterface.say(self.humanInterface.dictionary["announce_receiving"] + str(proposition))
+        response = self.__getTranscript(skippedText="czy akceptujesz")
+        if response == 'tak':
+            self.robot.say("Wspaniale, otrzymujesz " + str(proposition))
         else:
-            self.humanInterface.say(self.humanInterface.dictionary["offer_rejected"])
+            self.robot.say("Trudno, zostajesz z niczym.")        
+        time.sleep(3)
 
     def __ask_player_for_offer(self):
-        response = self.humanInterface.ask_int(self.humanInterface.dictionary["ask_for_offer"])
-        self.humanInterface.say(self.humanInterface.dictionary["confirm_offer"] + str(response))
+        self.robot.say("Podaj swoją propozycję.")
+        response = self.__getTranscript(skippedText="swoją propozycję")
+        self.robot.say("Wybrałeś " + str(response))
         return response
 
     def __pepper_accepts(self, player_proposition, total):
         accepted = self.player.respond(player_proposition / total)
         if accepted:
-            self.humanInterface.say(self.humanInterface.dictionary["offer_accepted"])
+            self.robot.say("Akceptuję, dostajesz " + str(player_proposition))
         else:
-            self.humanInterface.say(self.humanInterface.dictionary["offer_rejected"])
+            self.robot.say("Nie akceptuję, nie dostajesz nic")
 
     def __game_finish(self):
         self.robot.say("Dziękuję za grę")
@@ -85,11 +88,11 @@ class UltimatumGame:
         decision = self.__game_offer()
         print(decision)
         if "tak" in decision:
-            for i in range(1):
+            for i in range(2):
                 pepper_proposition = self.__pepper_offers(10)
-                # self.__ask_player_if_accepts(pepper_proposition)
-                # player_proposition = self.__ask_player_for_offer()
-                # self.__pepper_accepts(player_proposition, total)
+                self.__ask_player_if_accepts(pepper_proposition)
+                player_proposition = self.__ask_player_for_offer()
+                self.__pepper_accepts(player_proposition, total)
             self.__game_finish()
         print("odmowa gry w grę, koniec programu")
         self.robot.stop()

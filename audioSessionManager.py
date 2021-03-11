@@ -31,7 +31,7 @@ class AudioSessionManager(object):
         self._buff = queue.Queue()
 
     def __enter__(self):
-        self.audio_service.setClientPreferences(self.module_name, RATE, 3, 0)
+        self.audio_service.setClientPreferences(self.module_name, RATE, 3, 0) # 3 = AL::FRONTCHANNEL
         self.audio_service.subscribe(self.module_name)
         self.isProcessingDone = False
         return self

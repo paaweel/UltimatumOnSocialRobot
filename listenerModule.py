@@ -6,19 +6,37 @@ import json
 
 import qi
 import time
-from google.cloud import speech
-from google.cloud.speech import enums
-from google.cloud.speech import types
+# from google.cloud import speech
+# from google.cloud.speech import enums
+# from google.cloud.speech import types
+
+from google.cloud import speech_v1p1beta1 as speech
+from google.cloud.speech_v1p1beta1 import enums
+from google.cloud.speech_v1p1beta1 import types
+from google.protobuf.json_format import MessageToJson
 
 import collections
 import zmq
 import zlib, cPickle as pickle
 import json
 
-
 from audioSessionManager import AudioSessionManager
 RATE = 16000
+from datetime import datetime, timedelta
+from io import StringIO
 
+
+class WordInfo:
+    def __init__(self, **kwargs):
+        now = kwargs.get("now", "")
+        sT = float(kwargs.get("startTime", "")[:-1])
+        eT = float(kwargs.get("endTime", "")[:-1])
+        self.startTime= now + timedelta(0, sT)
+        self.endTime=now + timedelta(0, eT)
+        self.word=kwargs.get("word", "")
+
+    def __str__(self):
+        return self.word.encode('utf8') + " " + str(self.startTime) + " "  + str(self.endTime)
 
 class ListenerModule(object):
 
@@ -26,10 +44,16 @@ class ListenerModule(object):
         self.language_code = 'pl-PL'
 
         self.client = speech.SpeechClient()
+
         self.config = types.RecognitionConfig(
             encoding=enums.RecognitionConfig.AudioEncoding.LINEAR16,
             sample_rate_hertz=RATE,
-            language_code=self.language_code)
+            language_code=self.language_code,
+            model="command_and_search",
+            # diarization_config=d_config)
+            enable_speaker_diarization=True,
+            diarization_speaker_count=2,
+        )
         self.streaming_config = types.StreamingRecognitionConfig(
             config=self.config,
             interim_results=True)
@@ -84,6 +108,7 @@ class ListenerModule(object):
         """
         num_chars_printed = 0
         counter = 0
+        now = datetime.now()
         for response in responses:
             # The `results` list is consecutive. For streaming, we only care about
             # the first result being considered, since once it's `is_final`, it
@@ -94,6 +119,19 @@ class ListenerModule(object):
             if not result.alternatives:
                 continue
 
+            if response.results[0].is_final:
+                jsonResponse = json.loads(MessageToJson(response))
+                words = [
+                    WordInfo(
+                        word=wordInfo["word"],
+                        now=now,
+                        startTime=wordInfo["startTime"],
+                        endTime=wordInfo["endTime"]
+                    )
+                    for wordInfo in jsonResponse["results"][0]["alternatives"][0]["words"]
+                ]
+                for w in words:
+                    print(w)
             # Display the transcription of the top alternative.
             transcript = result.alternatives[0].transcript
 
@@ -108,6 +146,7 @@ class ListenerModule(object):
                 num_chars_printed = len(transcript)
             else:
                 print(transcript + overwrite_chars)
+                # print(transcript)
                 self.transcript_socket.send_string(transcript)
 
                 p = pickle.dumps(self.bytesBuffor[0], -1)

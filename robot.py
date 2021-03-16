@@ -12,6 +12,7 @@ import zmq
 import zlib, cPickle as pickle
 import numpy as np
 from speakerModule import SpeakerModule
+from helperModule import *
 
 class Robot:
     def __init__(self):
@@ -33,7 +34,6 @@ class Robot:
         self.transcript_receiver.setsockopt(zmq.CONFLATE, 1)
         self.transcript_receiver.connect("tcp://127.0.0.1:5557")
 
-        # self.transcriptProc = Process(target=self.receiveTranscript)
         self.audioProc = Process(target=self.receiveAudio)
         self.videoProc = Process(target=self.receiveVideo)
 
@@ -45,7 +45,9 @@ class Robot:
         self.speaker.say(text)
 
     def receiveTranscript(self):
-        return self.transcript_receiver.recv_string()
+        z = self.transcript_receiver.recv(0)
+        p = zlib.decompress(z)
+        return pickle.loads(p)
 
     def receiveAudio(self):
         try:
@@ -54,7 +56,6 @@ class Robot:
             audio_receiver.setsockopt(zmq.CONFLATE, 1)
             audio_receiver.connect("tcp://127.0.0.1:5558")
             while True:
-                print("getting audio")
                 z = audio_receiver.recv(0)
                 p = zlib.decompress(z)
                 audio = pickle.loads(p)
@@ -70,25 +71,20 @@ class Robot:
             video_receiver.setsockopt(zmq.CONFLATE, 1)
             video_receiver.connect("tcp://127.0.0.1:5559")
             while True:
-                print("getting video")
                 image_bytes = video_receiver.recv(0)
                 seqImages = np.frombuffer(image_bytes, dtype='uint8').reshape((3, 480, 640, 3))
                 gray = rgb2gray(seqImages[0])
                 self.videoData = gray
-                # plt.imshow(gray, cmap='gray')
-                # plt.show()
                 time.sleep(0.5)
         except KeyboardInterrupt:
             print("Exit signal was sent.")
 
     def start(self):
-        # self.transcriptProc.start()
         self.audioProc.start()
         self.videoProc.start()
         print("Opened connection to robot sensors.")
 
     def stop(self):
-        # self.transcriptProc.join()
         self.audioProc.join()
         self.videoProc.join()
         print("Closed connection to robot sensors.")

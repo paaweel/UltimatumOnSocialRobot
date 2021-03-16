@@ -2,13 +2,9 @@ import io
 import re
 import sys
 from threading import currentThread, Thread
-import json
-
 import qi
 import time
-# from google.cloud import speech
-# from google.cloud.speech import enums
-# from google.cloud.speech import types
+from helperModule import *
 
 from google.cloud import speech_v1p1beta1 as speech
 from google.cloud.speech_v1p1beta1 import enums
@@ -24,19 +20,6 @@ from audioSessionManager import AudioSessionManager
 RATE = 16000
 from datetime import datetime, timedelta
 from io import StringIO
-
-
-class WordInfo:
-    def __init__(self, **kwargs):
-        now = kwargs.get("now", "")
-        sT = float(kwargs.get("startTime", "")[:-1])
-        eT = float(kwargs.get("endTime", "")[:-1])
-        self.startTime= now + timedelta(0, sT)
-        self.endTime=now + timedelta(0, eT)
-        self.word=kwargs.get("word", "")
-
-    def __str__(self):
-        return self.word.encode('utf8') + " " + str(self.startTime) + " "  + str(self.endTime)
 
 
 def send_zipped_pickle(socket, obj, flags=0, protocol=-1):
@@ -150,16 +133,6 @@ class ListenerModule(object):
                 p = pickle.dumps(self.bytesBuffor[0], -1)
                 z = zlib.compress(p)
                 self.audio_socket.send(z, flags=0)
-
-                # Exit recognition if any of the transcribed phrases could be
-                # one of our keywords.
-                if re.search(r'\b(exit|quit)\b', transcript, re.I):
-                    print('Exiting..')
-                    mod.isProcessingDone = True
-                    break
-
-                num_chars_printed = 0
-
 
 
 if __name__ == '__main__':

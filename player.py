@@ -22,7 +22,7 @@ class RandomPlayer:
     """
 
     def propose(self, total):
-        return random.randrange(0, total)
+        return random.randrange(1, total-1)
 
     def respond(self, fraction):
         return bool(random.getrandbits(1))
@@ -38,7 +38,7 @@ class WeightedPlayer:
     """
 
     def propose(self, total):
-        return random.randrange(0, total)
+        return random.randrange(1, total-1)
 
     def respond(self, fraction):
         return random.uniform(0, 1) <= fraction

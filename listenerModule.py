@@ -38,6 +38,19 @@ class WordInfo:
     def __str__(self):
         return self.word.encode('utf8') + " " + str(self.startTime) + " "  + str(self.endTime)
 
+
+def send_zipped_pickle(socket, obj, flags=0, protocol=-1):
+    """pickle an object, and zip the pickle before sending it"""
+    p = pickle.dumps(obj, protocol)
+    z = zlib.compress(p)
+    return socket.send(z, flags=flags)
+
+def recv_zipped_pickle(socket, flags=0, protocol=-1):
+    """inverse of send_zipped_pickle"""
+    z = socket.recv(flags)
+    p = zlib.decompress(z)
+    return pickle.loads(p)
+
 class ListenerModule(object):
 
     def __init__(self, session):
@@ -132,7 +145,7 @@ class ListenerModule(object):
                 for w in words:
                     print(w)
 
-                self.transcript_socket.send_string(words)
+                send_zipped_pickle(self.transcript_socket, words)
 
                 p = pickle.dumps(self.bytesBuffor[0], -1)
                 z = zlib.compress(p)

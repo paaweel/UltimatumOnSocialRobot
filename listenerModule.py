@@ -110,9 +110,6 @@ class ListenerModule(object):
         counter = 0
         now = datetime.now()
         for response in responses:
-            # The `results` list is consecutive. For streaming, we only care about
-            # the first result being considered, since once it's `is_final`, it
-            # moves on to considering the next utterance.
             if len(response.results) == 0:
                 continue
             result = response.results[0]
@@ -130,24 +127,12 @@ class ListenerModule(object):
                     )
                     for wordInfo in jsonResponse["results"][0]["alternatives"][0]["words"]
                 ]
+
+            if result.is_final:
                 for w in words:
                     print(w)
-            # Display the transcription of the top alternative.
-            transcript = result.alternatives[0].transcript
 
-            # Display interim results, but with a carriage return at the end of the
-            # line, so subsequent lines will overwrite them.
-            #
-            # If the previous result was longer than this one, we need to print
-            # some extra spaces to overwrite the previous result
-            overwrite_chars = ' ' * (num_chars_printed - len(transcript))
-
-            if not result.is_final:
-                num_chars_printed = len(transcript)
-            else:
-                print(transcript + overwrite_chars)
-                # print(transcript)
-                self.transcript_socket.send_string(transcript)
+                self.transcript_socket.send_string(words)
 
                 p = pickle.dumps(self.bytesBuffor[0], -1)
                 z = zlib.compress(p)
@@ -161,6 +146,7 @@ class ListenerModule(object):
                     break
 
                 num_chars_printed = 0
+
 
 
 if __name__ == '__main__':

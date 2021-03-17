@@ -12,7 +12,7 @@ def main(session, topic_path):
     # Getting the service ALDialog
     # Getting the service ALDialog
     ALDialog = session.service("ALDialog")
-    ALDialog.setLanguage("English")
+    ALDialog.setLanguage("Polish")
 
     with open(topic_path, 'r') as f:
         topic_content_1 = f.read()

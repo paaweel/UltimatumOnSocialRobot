@@ -8,10 +8,9 @@ u: (e:FrontTactilTouched) Chcesz zagrać w grę?
    u1:([tak chcę]) Super! $OnAskAboutRules=1
    u1:(nie) Ojoj, trudno. Może innym razem.
 
-u: (e:OnAskAboutRules) Znasz zasady gry?
+u: (e:OnAskAboutRules) Znasz zasady gry Ultimatum?
    u1: ([tak znam]) Dobrze, w takim razie zaczynamy. Podaj swoją propozycję.
+    u2: (_[1 2 3 4 5 6 7 8 9]) $1 ^call(HumanGreeter.onSth("$1"))
    u1: (nie) $OnExplainRules=1
 
 u: (e:OnExplainRules) %rules Tutaj podam ci zasady gry. Są długie, więc na ten moment je pomińmy.
-
-u: (Hej) Co tam ziomalu ^call(HumanGreeter.onSth("1"))

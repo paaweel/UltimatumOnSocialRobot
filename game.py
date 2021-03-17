@@ -44,9 +44,10 @@ class UltimatumGame:
 
     def __get_integer(self, transcript, min=1, max=9):
         for i in transcript:
-            if i.word.lower().encode('utf8').isdigit():
-                digit = int(i.word.lower().encode('utf8'))
-                print(digit)
+            print("in loop", i.word, i.startTime)
+            if i.word.encode('utf8').isdigit():
+                print("all formats:", i.word, int(i.word), i.word.encode('utf8'), int(i.word.encode('utf8')), str(i.word))
+                digit = int(i.word.encode('utf8'))
                 if digit < 1:
                     self.robot.say("Za mało, ma być więcej niż 0, powtórz.")
                     time.sleep(3)
@@ -60,25 +61,34 @@ class UltimatumGame:
 
     def get_offer(self, sayTextTimespan):
         now = datetime.now()
+        print("now: ", now)
         time.sleep(3)
         transcript = self.robot.receiveTranscript()
         validStartTime = now + sayTextTimespan
+        print("validStartTime", validStartTime)
+        print("before:")
+        print("len(transcript))", len(transcript))
+        for i in transcript:
+            print(i.word, i.startTime, i.startTime > validStartTime)
         transcript = [word for word in transcript if word.startTime > validStartTime]
-        offerValue = self.__get_integer(transcript, 1, 9)
-        print(offerValue, transcript[-1].word)
-        while offerValue == None or not offerValue:
-            now = datetime.now()
-            time.sleep(2)
-            transcript = self.robot.receiveTranscript()
-            offerValue = self.__get_integer(transcript, now + timedelta(0, 2, 100000))
-            print(offerValue, transcript[-1].word)
-            if offerValue == None:
-                self.robot.say("Nie zrozumiałem, powtórz.")
-        return offerValue
+        print("len(transcript))", len(transcript))
+        print("after:")
+        for i in transcript:
+            print(i.word, i.startTime, i.startTime > validStartTime)
+        #
+        # offerValue = self.__get_integer(transcript, 1, 9)
+        # while offerValue == None or not offerValue:
+        #     now = datetime.now()
+        #     time.sleep(2)
+        #     transcript = self.robot.receiveTranscript()
+        #     offerValue = self.__get_integer(transcript, now + timedelta(0, 2, 100000))
+        #     if offerValue == None:
+        #         self.robot.say("Nie zrozumiałem, powtórz.")
+        # return offerValue
 
     def ask_player_for_offer(self):
         self.robot.say("Podaj swoją propozycję.")
-        response = self.get_offer(timedelta(0, 0, 500000))
+        response = self.get_offer(timedelta(0, 1, 500000))
         self.robot.say("Wybrałeś " + str(response))
         return response
 
@@ -129,13 +139,17 @@ class UltimatumGame:
 
     def run(self):
         total = 10
+        t1 = datetime.now()
         self.robot.say("Cześć, chcesz zagrać w grę?")
-        if self.ask_yes_no(timedelta(0, 2, 000000)):
-            for i in range(2):
-                pepper_proposition = self.player.propose(total)
-                self.ask_player_if_accepts(pepper_proposition)
-                player_proposition = self.ask_player_for_offer()
-                self.pepper_accepts(player_proposition, total)
-            self.game_finish()
+        t2 = datetime.now()
+        utteranceSpan = t2 - t1
+        print(utteranceSpan, t1, t2)
+        # if self.ask_yes_no(timedelta(0, 2, 000000)):
+        #     for i in range(2):
+        #         pepper_proposition = self.player.propose(total)
+        #         self.ask_player_if_accepts(pepper_proposition)
+        #         player_proposition = self.ask_player_for_offer()
+        #         self.pepper_accepts(player_proposition, total)
+        #     self.game_finish()
         print("odmowa gry w grę, koniec programu")
         self.robot.stop()

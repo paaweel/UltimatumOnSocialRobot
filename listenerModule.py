@@ -104,7 +104,7 @@ class ListenerModule(object):
         """
         num_chars_printed = 0
         counter = 0
-        now = datetime.now()
+        elapsedTime = timedelta(0, 0, 0)
         for response in responses:
             if len(response.results) == 0:
                 continue
@@ -112,21 +112,21 @@ class ListenerModule(object):
             if not result.alternatives:
                 continue
 
-            if response.results[0].is_final:
+            if result.is_final:
                 jsonResponse = json.loads(MessageToJson(response))
+                transcript = jsonResponse["results"][0]["alternatives"][0]["words"]
                 words = [
                     WordInfo(
                         word=wordInfo["word"],
-                        now=now,
                         startTime=wordInfo["startTime"],
                         endTime=wordInfo["endTime"]
                     )
-                    for wordInfo in jsonResponse["results"][0]["alternatives"][0]["words"]
+                    for wordInfo in transcript
+                    if timedelta(0, float(wordInfo["endTime"][:-1])) > elapsedTime
                 ]
-
-            if result.is_final:
                 for w in words:
                     print(w)
+                elapsedTime = timedelta(0, float(transcript[-1]["endTime"][:-1]))
 
                 send_zipped_pickle(self.transcript_socket, words)
 

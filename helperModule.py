@@ -8,11 +8,10 @@ def rgb2gray(img):
 
 class WordInfo:
     def __init__(self, **kwargs):
-        now = kwargs.get("now", "")
         sT = float(kwargs.get("startTime", "")[:-1])
         eT = float(kwargs.get("endTime", "")[:-1])
-        self.startTime= now + timedelta(0, sT)
-        self.endTime=now + timedelta(0, eT)
+        self.startTime=timedelta(0, sT)
+        self.endTime=timedelta(0, eT)
         self.word=kwargs.get("word", "")
 
     def __str__(self):

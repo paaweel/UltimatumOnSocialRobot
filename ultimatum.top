@@ -1,0 +1,15 @@
+topic: ~triggerGame()
+language: plp
+
+# u:(e:FrontTactilTouched) ^enable(gameOffer) ^goto(gameOffer)
+u:(["Jakie są reguły gry?" "Jakie są zasady gry?" "Jak się w to gra"]) Już podaję. $OnExplainRules=1
+
+u: (e:FrontTactilTouched) Chcesz zagrać w grę?
+   u1:([tak chcę]) Super! $OnAskAboutRules=1
+   u1:(nie) Ojoj, trudno. Może innym razem.
+
+u: (e:OnAskAboutRules) Znasz zasady gry?
+   u1: ([tak znam]) Dobrze, w takim razie zaczynamy. Podaj swoją propozycję.
+   u1: (nie) $OnExplainRules=1
+
+u: (e:OnExplainRules) %rules Tutaj podam ci zasady gry. Są długie, więc na ten moment je pomińmy.

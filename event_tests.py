@@ -50,7 +50,7 @@ class HumanGreeterModule(ALModule):
         memory.unsubscribeToEvent("FrontTactilTouched",
             "HumanGreeter")
 
-        self.tts.say("Cześć pączusiu")
+        self.tts.say("Cześć, chcesz ze mną zagrać w grę?")
 
         # Subscribe again to the event
         memory.subscribeToEvent("FrontTactilTouched",

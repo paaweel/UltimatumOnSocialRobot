@@ -60,7 +60,7 @@ if __name__ == "__main__":
     ip = '192.168.0.28'
     port = '9559'
     session.connect("tcp://{}:{}".format(ip, port))
-    
-    topic_path = "topic_ex.top"
+
+    topic_path = "ultimatum.top"
 
     main(session, topic_path)

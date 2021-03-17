@@ -12,12 +12,12 @@ def main(session, topic_path):
     # Getting the service ALDialog
     # Getting the service ALDialog
     ALDialog = session.service("ALDialog")
-    ALDialog.setLanguage("Polish")
+    ALDialog.setLanguage("English")
 
     with open(topic_path, 'r') as f:
         topic_content_1 = f.read()
 
-    # ALDialog.unloadTopic("example_topic_content")
+    # ALDialog.unloadTopic("example_topic")
 
     # writing topics' qichat code as text strings (end-of-line characters are important!)
     # topic_content_1 = ('topic: ~example_topic_content()\n'

@@ -33,29 +33,34 @@ class HumanGreeterModule(ALModule):
         # Create a proxy to ALTextToSpeech for later use
         self.tts = ALProxy("ALTextToSpeech")
 
-        # Subscribe to the FrontTactilTouched event:
+        # Subscribe to the UserIsHappy event:
         global memory
         memory = ALProxy("ALMemory")
-        memory.subscribeToEvent("FrontTactilTouched",
+        memory.subscribeToEvent("UserIsHappy",
             "HumanGreeter",
-            "onFrontTactilTouched")
+            "onUserIsHappy")
 
-    def onFrontTactilTouched(self, *_args):
+    def onUserIsHappy(self, *_args):
         """ This will be called each time a face is
         detected.
 
         """
         # Unsubscribe to the event when talking,
         # to avoid repetitions
-        memory.unsubscribeToEvent("FrontTactilTouched",
+        memory.unsubscribeToEvent("UserIsHappy",
             "HumanGreeter")
 
+        print(_args)
         self.tts.say("Cześć pączusiu")
 
         # Subscribe again to the event
-        memory.subscribeToEvent("FrontTactilTouched",
+        memory.subscribeToEvent("UserIsHappy",
             "HumanGreeter",
-            "onFrontTactilTouched")
+            "onUserIsHappy")
+    
+    def onSth(self, par):
+        print("called")
+        print(par)
 
 
 def main():

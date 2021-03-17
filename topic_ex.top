@@ -1,5 +1,7 @@
 topic: ~example_topic()
-language: plp
+language: enu 
+
+u: (Hey) What up mate ^call(HumanGreeter.onSth("1"))
 
 # concept:(food) [fruits chicken beef eggs]
 # 
@@ -7,7 +9,7 @@ language: plp
 # u: (how are you today) Hello human, I am fine thank you and you?
 # u: (Good morning Nao did you sleep well) No damn! You forgot to switch me off!
 # 
-# u: ([e:FrontTactilTouched e:MiddleTactilTouched e:RearTactilTouched]) You touched my head!
+# u: (e:FrontTactilTouched) 
 # 
 # u: (Do you want to be tested) %testing Yes, please, test me now!
 # u: (test test test) Yes, it works!

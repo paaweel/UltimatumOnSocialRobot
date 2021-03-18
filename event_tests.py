@@ -5,6 +5,7 @@
 
 import sys
 import time
+import random
 
 from naoqi import ALProxy
 from naoqi import ALBroker
@@ -57,10 +58,14 @@ class HumanGreeterModule(ALModule):
         memory.subscribeToEvent("UserIsHappy",
             "HumanGreeter",
             "onUserIsHappy")
-    
-    def onSth(self, par):
-        print("called")
-        print(par)
+
+    def onHumanOffers(self, offer):
+        print("Human offer value: ", offer)
+
+    def onDrawOffer(self):
+        robotOffer = random.randint(1, 9)
+        print("Robot offer value: ", robotOffer)
+        return 1
 
 
 def main():

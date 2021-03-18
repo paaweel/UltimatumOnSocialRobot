@@ -17,29 +17,10 @@ def main(session, topic_path):
     with open(topic_path, 'r') as f:
         topic_content_1 = f.read()
 
-    # ALDialog.unloadTopic("example_topic")
+    # ALDialog.unloadTopic("triggerGame")
 
-    # writing topics' qichat code as text strings (end-of-line characters are important!)
-    # topic_content_1 = ('topic: ~example_topic_content()\n'
-    #                     'language: plp\n'
-    #                     'proposal: No powiedz coś mądrego\n'
-    #                     'u: (e:WavingDetection/Waving) No siema\n'
-    #                     'u: (e:WavingDetection/PersonWaving) No siema\n'
-    #                     'u: (e:WavingDetection/CloseWaving) No siema\n'
-    #                     'u: (e:RightBumperPressed) ej nie kop mnie ziom!\n'
-    #                     'u: (e:LeftBumperPressed) ej nie kop mnie ziom\n'
-    #                     'u: (I cóż, że ze Szwecji) u rozpoznałem to\n')
-
-    # Loading the topics directly as text strings
     topic_name_1 = ALDialog.loadTopicContent(topic_content_1)
-    # topic_name_2 = ALDialog.loadTopicContent(topic_content_2)
-
-    # Activating the loaded topics
     ALDialog.activateTopic(topic_name_1)
-    # ALDialog.activateTopic(topic_name_2)
-
-    # Starting the dialog engine - we need to type an arbitrary string as the identifier
-    # We subscribe only ONCE, regardless of the number of topics we have activated
     ALDialog.subscribe('my_dialog_example')
 
     try:

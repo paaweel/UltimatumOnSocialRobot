@@ -65,7 +65,7 @@ class HumanGreeterModule(ALModule):
     def onDrawOffer(self):
         robotOffer = random.randint(1, 9)
         print("Robot offer value: ", robotOffer)
-        return 1
+        return robotOffer
 
 
 def main():

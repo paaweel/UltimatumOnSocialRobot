@@ -1,8 +1,6 @@
 topic: ~triggerGame()
 language: plp
 
-u: (e:FrontTactilTouched) $OnStartRound=1
-
 u: (e:FrontTactilTouched) Chcesz zagrać w grę?
   u1:([tak chcę poproszę "tak chcę"]) Super! $OnAskAboutRules=1
   u1:(nie) $robotOffer Ojoj, trudno. Może innym razem.

@@ -1,6 +1,8 @@
 topic: ~triggerGame()
 language: plp
 
+u: (start) $OnStartRound=1
+
 u: (e:FrontTactilTouched) Chcesz zagrać w grę?
   u1:([tak chcę poproszę "tak chcę"]) Super! $OnAskAboutRules=1
   u1:(nie) $robotOffer Ojoj, trudno. Może innym razem.
@@ -14,16 +16,16 @@ u: (e:OnAskAboutRules) Znasz zasady gry Ultimatum?
 u: (e:OnExplainRules) %rules Tutaj podam ci zasady gry. Są długie, więc na ten moment je pomińmy. $OnStartRound=1
 
 u: (e:OnStartRound) Podaj swoją propozycję.
-   u1: (_[1 2 3 4 5 6 7 8 9]) Wybrałeś $1 $humanOffer=$1 ^call(HumanGreeter.onHumanOffers($humanOffer)) $OnRobotDecision=1
+   u1: (_[1 2 3 4 5 6 7 8 9]) Wybrałeś $1 $humanOffer=$1 ^call(HumanGreeter.onHumanOffers($humanOffer))
+    c2: (True) Akceptuję, otrzymujesz $humanOffer $OnRobotOffers=1
+    c2: (False) Nie akceptuję, zostajesz z niczym. $OnRobotOffers=1
    u1: (e:Dialog/NoOneSpeak5) Przypominam, że musisz podać liczbę od 1 do 9. $OnStartRound=1
 
-u: (e:OnRobotDecision) ["Nie akceptuję, zostajesz z niczym. $humanOffer<5" "Akceptuję, otrzymujesz $humanOffer $humanOffer>5" "Akceptuję, otrzymujesz $humanOffer $humanOffer==5"]  $OnRobotOffers=1
-
-u: (e:OnRobotOffers) Ja proponuję ci 1 ^sCall(HumanGreeter.onDrawOffer())
-c1:(1) Akceptujesz?
-   u2: ([tak akceptuję poproszę]) Wspaniale! Otrzymujesz tę kasę. $OnContinue=1
-   u2: ([nie "nie akceptuję" odrzucam spadaj nigdy]) W takim razie oboje nic nie otrzymujemy. $OnContinue=1
+u: (e:OnRobotOffers) Ja proponuję ci ^call(HumanGreeter.onDrawOffer())
+c1:(_*) $1 $robotOffer=$1 Akceptujesz?
+   u2: ([tak akceptuję poproszę]) Wspaniale! Otrzymujesz $robotOffer ^call(HumanGreeter.onHumanDecision("True")) $OnContinue=1
+   u2: ([nie "nie akceptuję" odrzucam spadaj nigdy]) W takim razie oboje nic nie otrzymujemy. ^call(HumanGreeter.onHumanDecision("False")) $OnContinue=1
 
 u: (e:OnContinue) Chcesz dalej grać?
   u1: ([tak chcę poproszę]) Dobrze, gramy dalej! $OnStartRound=1
-  u2: ([nie "już tyle" "nie dziękuję"]) Tudno, dziękuję za świetną zabawę!
+  u1: ([nie "już tyle" "nie dziękuję"]) Tudno, dziękuję za świetną zabawę!

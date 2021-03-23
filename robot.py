@@ -29,11 +29,6 @@ class Robot:
 
         self.speaker = SpeakerModule()
 
-        context = zmq.Context()
-        self.transcript_receiver = context.socket(zmq.PULL)
-        self.transcript_receiver.setsockopt(zmq.CONFLATE, 1)
-        self.transcript_receiver.connect("tcp://127.0.0.1:5557")
-
         self.audioProc = Process(target=self.receiveAudio)
         self.videoProc = Process(target=self.receiveVideo)
 

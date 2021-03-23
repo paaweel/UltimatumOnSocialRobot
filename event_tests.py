@@ -13,6 +13,8 @@ from naoqi import ALModule
 
 from optparse import OptionParser
 
+from game import UltimatumGame
+
 NAO_IP = "nao.local"
 
 
@@ -37,35 +39,31 @@ class HumanGreeterModule(ALModule):
         # Subscribe to the UserIsHappy event:
         global memory
         memory = ALProxy("ALMemory")
-        memory.subscribeToEvent("UserIsHappy",
-            "HumanGreeter",
-            "onUserIsHappy")
-
-    def onUserIsHappy(self, *_args):
-        """ This will be called each time a face is
-        detected.
-
-        """
-        # Unsubscribe to the event when talking,
-        # to avoid repetitions
-        memory.unsubscribeToEvent("UserIsHappy",
-            "HumanGreeter")
-
-        print(_args)
-        self.tts.say("Cześć pączusiu")
-
-        # Subscribe again to the event
-        memory.subscribeToEvent("UserIsHappy",
-            "HumanGreeter",
-            "onUserIsHappy")
+        self.ultimatumGame = UltimatumGame()
 
     def onHumanOffers(self, offer):
         print("Human offer value: ", offer)
+        self.ultimatumGame.humanOffer = offer
+        if self.ultimatumGame.player.respond(self.ultimatumGame.refusalFraction):
+            self.ultimatumGame.robotTotalScore += self.ultimatumGame.humanOffer
+            self.ultimatumGame.humanTotalScore += self.ultimatumGame.totalMoney - self.ultimatumGame.humanOffer
+            print("Total score R:H: ", self.ultimatumGame.robotTotalScore, self.ultimatumGame.humanTotalScore)
+            return "True"
+        print("Total score R:H: ", self.ultimatumGame.robotTotalScore, self.ultimatumGame.humanTotalScore)
+        return "False"
 
     def onDrawOffer(self):
-        robotOffer = random.randint(1, 9)
+        robotOffer = self.ultimatumGame.player.propose(self.ultimatumGame.totalMoney)
+        self.ultimatumGame.robotOffer = robotOffer
         print("Robot offer value: ", robotOffer)
         return robotOffer
+
+    def onHumanDecision(self, decision):
+        print("decision", decision)
+        if decision == "True":
+            self.ultimatumGame.humanTotalScore += self.ultimatumGame.robotOffer
+            self.ultimatumGame.robotTotalScore += self.ultimatumGame.totalMoney - self.ultimatumGame.humanOffer
+        print("Total score R:H: ", self.ultimatumGame.robotTotalScore, self.ultimatumGame.humanTotalScore)
 
 
 def main():

@@ -4,6 +4,13 @@
 import qi
 import sys
 
+def runTopic(topic_path = "ultimatum.top"):
+    session = qi.Session()
+    ip = '192.168.0.28'
+    port = '9559'
+    session.connect("tcp://{}:{}".format(ip, port))
+    main(session, topic_path)
+
 def main(session, topic_path):
     """
     This example uses ALDialog methods.
@@ -35,6 +42,7 @@ def main(session, topic_path):
         # now that the dialog engine is stopped and there are no more activated topics,
         # we can unload all topics and free the associated memory
         ALDialog.unloadTopic(topic_name_1)
+        sys.exit(0)
 
 if __name__ == "__main__":
     session = qi.Session()

@@ -4,8 +4,8 @@ language: plp
 u: (start) $OnStartRound=1
 
 u: (e:FrontTactilTouched) Chcesz zagrać w grę?
-  u1:([tak chcę poproszę "tak chcę"]) Super! $OnAskAboutRules=1
-  u1:(nie) $robotOffer Ojoj, trudno. Może innym razem.
+  u1:([tak chcę chce poproszę poprosze "tak chcę"]) Super! $OnAskAboutRules=1
+  u1:(nie) Ojoj, trudno. Może innym razem.
 
 u:(["Jakie są reguły gry?" "Jakie są zasady gry?" "Jak się w to gra"]) Już podaję. $OnExplainRules=1
 
@@ -23,9 +23,9 @@ u: (e:OnStartRound) Podaj swoją propozycję.
 
 u: (e:OnRobotOffers) Ja proponuję ci ^call(HumanGreeter.onDrawOffer())
 c1:(_*) $1 $robotOffer=$1 Akceptujesz?
-   u2: ([tak akceptuję poproszę]) Wspaniale! Otrzymujesz $robotOffer ^call(HumanGreeter.onHumanDecision("True")) $OnContinue=1
+   u2: ([tak akceptuję akceptuje akceptuje poproszę poprosze]) Wspaniale! Otrzymujesz $robotOffer ^call(HumanGreeter.onHumanDecision("True")) $OnContinue=1
    u2: ([nie "nie akceptuję" odrzucam spadaj nigdy]) W takim razie oboje nic nie otrzymujemy. ^call(HumanGreeter.onHumanDecision("False")) $OnContinue=1
 
 u: (e:OnContinue) Chcesz dalej grać?
-  u1: ([tak chcę poproszę]) Dobrze, gramy dalej! $OnStartRound=1
+  u1: ([tak chcę poproszę poprosze]) Dobrze, gramy dalej! $OnStartRound=1
   u1: ([nie "już tyle" "nie dziękuję"]) Tudno, dziękuję za świetną zabawę!

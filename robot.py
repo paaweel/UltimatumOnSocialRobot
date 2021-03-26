@@ -4,8 +4,6 @@
 import qi
 from concurrent.futures import ThreadPoolExecutor, Future
 import sys
-from listenerModule import ListenerModule
-ListenerModule
 import time
 from multiprocessing import Process
 import zmq
@@ -50,14 +48,16 @@ class Robot:
             audio_receiver = context.socket(zmq.PULL)
             audio_receiver.setsockopt(zmq.CONFLATE, 1)
             audio_receiver.connect("tcp://127.0.0.1:5558")
+            f = open("demofile2.txt", "a")
             while True:
                 z = audio_receiver.recv(0)
                 p = zlib.decompress(z)
                 audio = pickle.loads(p)
-                self.audioData = audio
+                print(audio)
                 time.sleep(0.5)
         except KeyboardInterrupt:
             print("Exit signal was sent.")
+            f.close()
 
     def receiveVideo(self):
         try:
@@ -83,3 +83,7 @@ class Robot:
         self.audioProc.join()
         self.videoProc.join()
         print("Closed connection to robot sensors.")
+
+if __name__ == '__main__':
+    robot = Robot()
+    robot.receiveAudio()

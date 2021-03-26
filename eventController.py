@@ -66,7 +66,7 @@ class HumanGreeterModule(ALModule):
         print("Total score R:H: ", self.ultimatumGame.robotTotalScore, self.ultimatumGame.humanTotalScore)
 
 
-def main():
+def runEventListener():
     """ Main entry point
 
     """
@@ -103,15 +103,13 @@ def main():
     HumanGreeter = HumanGreeterModule("HumanGreeter")
 
     try:
-        while True:
-            time.sleep(1)
+        raw_input()
     except KeyboardInterrupt:
-        print
         print "Interrupted by user, shutting down"
-        myBroker.shutdown()
-        sys.exit(0)
+    myBroker.shutdown()
+    sys.exit(0)
 
 
 
 if __name__ == "__main__":
-    main()
+    runEventListener()

@@ -1,16 +1,15 @@
 import random
 import numpy as np
 import qi
-from multiprocessing import Process
-from threading import Thread
 from PIL import Image
 import array
-from matplotlib import pyplot as plt
 from collections import deque
 import zmq
 import time
-from PIL import Image
 import logging
+from dbConnector import DbConnector
+import os
+from helperModule import *
 
 
 class VideoModule:
@@ -54,7 +53,10 @@ class VideoModule:
         logging.debug('Subscribing to a face detection service')
         self.faceDetection.subscribe("VideoModule")
 
-        self.seqFrames = deque([], maxlen=3)
+        # for baseline model we don't capture sequences,
+        # for sequences change into framesCnt = 3
+        self.framesCnt = 1
+        self.seqFrames = deque([], maxlen=self.framesCnt)
         self.emotions = deque([], maxlen=10)
 
         zmqSocket = "tcp://127.0.0.1:5559"
@@ -64,6 +66,14 @@ class VideoModule:
         self.context = zmq.Context()
         self.videoEmotionsSocket = self.context.socket(zmq.PUSH)
         self.videoEmotionsSocket.bind(zmqSocket)
+
+        AI_MODELS_DIR = os.path.join(os.getcwd(), 'AI_models/video')
+        logging.debug('Loading model from ' + AI_MODELS_DIR)
+        with open(os.path.join(AI_MODELS_DIR, 'baseline.json'), 'r') as json_file:
+           txt_model = json_file.read()
+           self.model = model_from_json(txt_model)
+           self.model.load_weights(os.path.join(AI_MODELS_DIR, 'best_baseline.hdf5')
+           logging.debug('Model loading finished')
 
     def closeConnection(self):
         logging.debug('Unsubscribing video and face detection services')
@@ -76,7 +86,7 @@ class VideoModule:
             logging.debug('Human tracked, timestamp: ', value[0])
             # there's an assumption human won't move much between 3 frames
             # if frames too slow - change the cropping error tolerance in cropFace
-            for i in range(3):
+            for i in range(self.framesCnt):
                 result = self.videoService.getImageRemote(self.client)
                 if result is None:
                     logging.error('Cannot capture frame')
@@ -88,10 +98,12 @@ class VideoModule:
                 im = np.frombuffer(result[6], np.uint8)
                        .reshape(self.height, self.width, 3)
                 croppedFace = cropFace(im, value[1])
-                self.seqFrames.append(croppedFace)
+                croppedBinVersor = np.expand_dims(rgb2gray(croppedFace), 2)
+                self.seqFrames.append(croppedBinVersor)
             # put the 3-frame sequence into AI
-            predictedEmotion = random.randrange(0, 4)
-            self.emotions.appendleft(predictedEmotion)
+            predictions = model.predict(numpy.asarray(self.seqFrames))
+            predictedEmotion = np.argmax(predictions)
+            self.emotions.appendleft(predictions)
             print(self.emotions[0])
             # self.videoEmotionsSocket.send(self.emotions[0])
 
@@ -117,6 +129,7 @@ class VideoModule:
 
 
 if __name__ == "__main__":
+    db = DbConnector()
     logging.basicConfig(filename='videoModule.log',level=logging.DEBUG)
     logging.debug('Starting video module')
     camera = VideoModule()

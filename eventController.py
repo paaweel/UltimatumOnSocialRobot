@@ -16,6 +16,7 @@ from optparse import OptionParser
 from game import UltimatumGame
 
 NAO_IP = "nao.local"
+PEPPER_IP = '192.168.1.123'
 
 
 # Global variable to store the HumanGreeter module instance

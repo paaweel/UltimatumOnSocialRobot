@@ -7,13 +7,16 @@ from collections import deque
 import zmq
 import time
 import logging
-from dbConnector import DbConnector
+# from dbConnector import DbConnector
 import os
 from helperModule import *
+from keras.models import model_from_json
 
+NAO_IP = '192.168.0.28'
+PEPPER_IP = '192.168.1.123'
 
 class VideoModule:
-    def __init__(self, ip="192.168.0.28", port="9559"):
+    def __init__(self, ip=NAO_IP, port="9559"):
         # type: (str, str, str) -> None
         self.session = qi.Session()
         try:
@@ -67,13 +70,13 @@ class VideoModule:
         self.videoEmotionsSocket = self.context.socket(zmq.PUSH)
         self.videoEmotionsSocket.bind(zmqSocket)
 
-        AI_MODELS_DIR = os.path.join(os.getcwd(), 'AI_models/video')
+        AI_MODELS_DIR = os.path.join(os.getcwd(), 'AI_models/vision')
         logging.debug('Loading model from ' + AI_MODELS_DIR)
         with open(os.path.join(AI_MODELS_DIR, 'baseline.json'), 'r') as json_file:
            txt_model = json_file.read()
            self.model = model_from_json(txt_model)
-           self.model.load_weights(os.path.join(AI_MODELS_DIR, 'best_baseline.hdf5')
-           logging.debug('Model loading finished')
+           self.model.load_weights(os.path.join(AI_MODELS_DIR, 'best_baseline.hdf5'))
+           logging.debug("Model loading finished")
 
     def closeConnection(self):
         logging.debug('Unsubscribing video and face detection services')
@@ -81,8 +84,7 @@ class VideoModule:
         self.faceDetection.unsubscribe("VideoModule")
 
     def onHumanTracked(self, value):
-        if value == []:
-        else:
+        if value != []:
             logging.debug('Human tracked, timestamp: ', value[0])
             # there's an assumption human won't move much between 3 frames
             # if frames too slow - change the cropping error tolerance in cropFace
@@ -95,8 +97,7 @@ class VideoModule:
                 elif self.width == None or self.height == None:
                     self.width = result[0]
                     self.height = result[1]
-                im = np.frombuffer(result[6], np.uint8)
-                       .reshape(self.height, self.width, 3)
+                im = np.frombuffer(result[6], np.uint8).reshape(self.height, self.width, 3)
                 croppedFace = cropFace(im, value[1])
                 croppedBinVersor = np.expand_dims(rgb2gray(croppedFace), 2)
                 self.seqFrames.append(croppedBinVersor)
@@ -129,7 +130,7 @@ class VideoModule:
 
 
 if __name__ == "__main__":
-    db = DbConnector()
+    # db = DbConnector()
     logging.basicConfig(filename='videoModule.log',level=logging.DEBUG)
     logging.debug('Starting video module')
     camera = VideoModule()

@@ -1,7 +1,10 @@
 topic: ~triggerGame()
 language: plp
 
-u: (start) $OnStartRound=1
+u: (start) ^call(Events.resetListenFlag()) Teraz sobie coś powiem ^sCall(Events.setListenFlag())
+  u1: (dobrze) ^call(Events.resetListenFlag()) Udało się? ^sCall(Events.setListenFlag())
+    u2: (tak) ^call(Events.resetListenFlag()) super!
+    u2: (nie) Ojoj
 
 u: (e:FrontTactilTouched) Chcesz zagrać w grę?
   u1:([tak chcę chce poproszę poprosze "tak chcę"]) Super! $OnAskAboutRules=1
@@ -16,15 +19,15 @@ u: (e:OnAskAboutRules) Znasz zasady gry Ultimatum?
 u: (e:OnExplainRules) %rules Tutaj podam ci zasady gry. Są długie, więc na ten moment je pomińmy. $OnStartRound=1
 
 u: (e:OnStartRound) Podaj swoją propozycję.
-   u1: (_[1 2 3 4 5 6 7 8 9]) Wybrałeś $1 $humanOffer=$1 ^call(HumanGreeter.onHumanOffers($humanOffer))
+   u1: (_[1 2 3 4 5 6 7 8 9]) Wybrałeś $1 $humanOffer=$1 ^call(Events.onHumanOffers($humanOffer))
     c2: (True) Akceptuję, otrzymujesz $humanOffer $OnRobotOffers=1
     c2: (False) Nie akceptuję, zostajesz z niczym. $OnRobotOffers=1
    u1: (e:Dialog/NoOneSpeak5) Przypominam, że musisz podać liczbę od 1 do 9. $OnStartRound=1
 
-u: (e:OnRobotOffers) Ja proponuję ci ^call(HumanGreeter.onDrawOffer())
+u: (e:OnRobotOffers) Ja proponuję ci ^call(Events.onDrawOffer())
 c1:(_*) $1 $robotOffer=$1 Akceptujesz?
-   u2: ([tak akceptuję akceptuje akceptuje poproszę poprosze]) Wspaniale! Otrzymujesz $robotOffer ^call(HumanGreeter.onHumanDecision("True")) $OnContinue=1
-   u2: ([nie "nie akceptuję" odrzucam spadaj nigdy]) W takim razie oboje nic nie otrzymujemy. ^call(HumanGreeter.onHumanDecision("False")) $OnContinue=1
+   u2: ([tak akceptuję akceptuje akceptuje poproszę poprosze]) Wspaniale! Otrzymujesz $robotOffer ^call(Events.onHumanDecision("True")) $OnContinue=1
+   u2: ([nie "nie akceptuję" odrzucam spadaj nigdy]) W takim razie oboje nic nie otrzymujemy. ^call(Events.onHumanDecision("False")) $OnContinue=1
 
 u: (e:OnContinue) Chcesz dalej grać?
   u1: ([tak chcę poproszę poprosze]) Dobrze, gramy dalej! $OnStartRound=1

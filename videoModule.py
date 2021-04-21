@@ -6,9 +6,12 @@ import array
 from collections import deque
 import zmq
 import time
+from datetime import datetime
 import logging
 # from dbConnector import DbConnector
 import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+from tensorflow.keras.models import model_from_json
 from helperModule import *
 from keras.models import model_from_json
 
@@ -34,9 +37,8 @@ class VideoModule:
                   + ip + "\" on port " + port + ".\n"
                   + "Please check your script arguments. "
                   + "Run with -h option for help.")
-        logging.debug('Subscribing to a video service')
+        # logging.debug('Subscribing to a video service')
         self.resolution = 2
-        # 0: 0.30, 1, 6, 8: 0.45, 2: 0.6, 7: 0.40, 5: 0.40
         self.colorSpace = 11
         self.fps = 20
         self.width = None
@@ -60,23 +62,22 @@ class VideoModule:
         # for sequences change into framesCnt = 3
         self.framesCnt = 1
         self.seqFrames = deque([], maxlen=self.framesCnt)
-        self.emotions = deque([], maxlen=10)
 
         zmqSocket = "tcp://127.0.0.1:5559"
         logging.debug('Opening PUSH ZMQ communication on '
                     + zmqSocket
-                    + 'for facial emotion labels')
+                    + ' for facial emotion labels')
         self.context = zmq.Context()
         self.videoEmotionsSocket = self.context.socket(zmq.PUSH)
         self.videoEmotionsSocket.bind(zmqSocket)
 
         AI_MODELS_DIR = os.path.join(os.getcwd(), 'AI_models/vision')
         logging.debug('Loading model from ' + AI_MODELS_DIR)
-        with open(os.path.join(AI_MODELS_DIR, 'baseline.json'), 'r') as json_file:
+        with open(os.path.join(AI_MODELS_DIR, 'best.json'), 'r') as json_file:
            txt_model = json_file.read()
            self.model = model_from_json(txt_model)
-           self.model.load_weights(os.path.join(AI_MODELS_DIR, 'best_baseline.hdf5'))
-           logging.debug("Model loading finished")
+           self.model.load_weights(os.path.join(AI_MODELS_DIR, 'best.hdf5'))
+           logging.debug('Model loading finished')
 
     def closeConnection(self):
         logging.debug('Unsubscribing video and face detection services')
@@ -84,8 +85,12 @@ class VideoModule:
         self.faceDetection.unsubscribe("VideoModule")
 
     def onHumanTracked(self, value):
+        try:
+            self.faceDetection.unsubscribe("VideoModule")
+        except:
+            return
         if value != []:
-            logging.debug('Human tracked, timestamp: ', value[0])
+            logging.debug('Human tracked, time: ' + datetime.now().strftime("%m/%d/%Y, %H:%M:%S"))
             # there's an assumption human won't move much between 3 frames
             # if frames too slow - change the cropping error tolerance in cropFace
             for i in range(self.framesCnt):
@@ -98,15 +103,17 @@ class VideoModule:
                     self.width = result[0]
                     self.height = result[1]
                 im = np.frombuffer(result[6], np.uint8).reshape(self.height, self.width, 3)
-                croppedFace = cropFace(im, value[1])
+                croppedFace = self.cropFace(im, value[1])
+                # Image.fromarray(croppedFace).show()
                 croppedBinVersor = np.expand_dims(rgb2gray(croppedFace), 2)
                 self.seqFrames.append(croppedBinVersor)
             # put the 3-frame sequence into AI
-            predictions = model.predict(numpy.asarray(self.seqFrames))
+            predictions = self.model.predict(np.asarray(self.seqFrames))
             predictedEmotion = np.argmax(predictions)
-            self.emotions.appendleft(predictions)
-            print(self.emotions[0])
-            # self.videoEmotionsSocket.send(self.emotions[0])
+            print(predictedEmotion, predictions)
+            self.videoEmotionsSocket.send(predictions)
+        self.faceDetection.subscribe("VideoModule")
+
 
     def cropFace(self, npImg, faceInfo):
         img = Image.fromarray(npImg)
@@ -126,7 +133,7 @@ class VideoModule:
         faceY2 = int(faceCenterY + (faceWidth / 2))
 
         faceImg = img.crop((faceX1, self.height-faceY1, faceX2, faceY2))
-        return np.array(faceImg.resize((75, 75), Image.BILINEAR))
+        return np.array(faceImg.resize((96, 96), Image.BILINEAR))
 
 
 if __name__ == "__main__":

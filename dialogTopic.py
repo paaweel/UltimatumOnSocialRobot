@@ -4,7 +4,7 @@
 import qi
 import sys
 
-NAO_IP = '192.168.0.28'
+NAO_IP = '192.168.0.31'
 PEPPER_IP = '192.168.1.123'
 
 def runTopic(topic_path = "ultimatum.top"):
@@ -49,7 +49,7 @@ def main(session, topic_path):
 
 if __name__ == "__main__":
     session = qi.Session()
-    ip = '192.168.1.123'#'192.168.0.28'
+    ip = '192.168.0.31'
     port = '9559'
     session.connect("tcp://{}:{}".format(ip, port))
 

@@ -1,6 +1,6 @@
 import sqlite3
 import logging
-import os
+import os.path
 import pandas as pd
 from pandas import DataFrame
 
@@ -10,7 +10,7 @@ class DbConnector:
         self.dbName = 'ultiatumGame.db'
         connectionString = sqlite3.connect(self.dbName)
         self.connector = connectionString.cursor()
-        if not os.path.isFile(self.dbName):
+        if not os.path.isfile(self.dbName):
             logging.debug('Creating a new database')
             # create table for videoModule:
             self.connector.execute('''CREATE TABLE VIDEO_EMOTIONS

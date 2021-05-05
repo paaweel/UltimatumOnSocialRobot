@@ -15,6 +15,7 @@ import collections
 import zmq
 import zlib, cPickle as pickle
 import json
+from datetime import datetime
 
 from audioSessionManager import AudioSessionManager
 RATE = 16000
@@ -45,20 +46,21 @@ class ListenerModule(object):
 
     def run(self, timeout=1):
         try:
-            while True:
-                for i in range(timeout*10):
-                    with AudioSessionManager(self.session, timeout*10) as stream:
-                        content = [content.tobytes() for content in stream.data()]
-                p = pickle.dumps(content, -1)
-                z = zlib.compress(p)
-                self.audio_socket.send(z, flags=0)
+            now = datetime.now()
+            with AudioSessionManager(self.session, timeout*100000) as stream:
+                content = [content.tobytes() for content in stream.data()]
+            print(content)
+            # p = pickle.dumps(content, -1)
+            # z = zlib.compress(p)
+            # self.audio_socket.send(z, flags=0)
+            print(datetime.now() - now)
         except KeyboardInterrupt:
             print("Exit signal was sent.")
 
 
 if __name__ == '__main__':
     session = qi.Session()
-    ip = '192.168.0.28'
+    ip = '192.168.0.31'
     port = '9559'
     try:
         session.connect("tcp://" + ip + ":" + port)

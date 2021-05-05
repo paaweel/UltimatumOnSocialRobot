@@ -47,12 +47,11 @@ class EventsModule(ALModule):
         self.soundDetector = SoundDetector(session)
 
     def setListenFlag(self):
-        print("Setting flag")
         self.soundDetector.waitForSound = True
 
     def resetListenFlag(self):
-        print("Resetting flag")
         self.soundDetector.waitForSound = False
+        self.soundDetector.stopListening()
 
     def onHumanOffers(self, offer):
         print("Human offer value: ", offer)
@@ -122,7 +121,9 @@ def runEventListener():
     Events = EventsModule("Events", session)
 
     try:
-        raw_input()
+        # raw_input()
+        while(True):
+            a = 1
     except KeyboardInterrupt:
         print "Interrupted by user, shutting down"
     myBroker.shutdown()

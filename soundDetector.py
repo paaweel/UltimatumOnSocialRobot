@@ -1,7 +1,10 @@
 import qi
+from naoqi import ALProxy
 import argparse
 import sys
 import time
+import os
+
 
 
 class SoundDetector():
@@ -13,11 +16,28 @@ class SoundDetector():
         self.soundDetectionService.subscribe("SoundDetector")
         self.soundDetectionService.setParameter("Sensitivity", 0.90)
         self.waitForSound = False
+        self.audioRecorder = ALProxy("ALAudioRecorder")
+        self.channels = [0, 0, 1, 0]
+        self.recPath = '/home/nao/recording.wav'
 
     def onSound(self, value):
         if value[0][1] == 1 and self.waitForSound:
-            print value
+            try:
+                self.soundDetectionService.unsubscribe("SoundDetector")
+                self.audioRecorder.stopMicrophonesRecording()
+                self.audioRecorder.startMicrophonesRecording(self.recPath, "wav", 16000, self.channels)
+            except:
+                return
+
         else:
+            return
+
+    def stopListening(self):
+        try:
+            self.audioRecorder.stopMicrophonesRecording()
+            os.system('scp nao@nao.local:{0} .'.format(self.recPath))
+            self.soundDetectionService.subscribe("SoundDetector")
+        except:
             return
 
     def unsubscribe(self):

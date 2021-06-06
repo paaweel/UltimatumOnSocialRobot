@@ -50,8 +50,9 @@ class EventsModule(ALModule):
         self.soundDetector.waitForSound = True
 
     def resetListenFlag(self):
-        self.soundDetector.waitForSound = False
-        self.soundDetector.stopListening()
+        if self.soundDetector.waitForSound:
+            self.soundDetector.waitForSound = False
+            self.soundDetector.stopListening()
 
     def onHumanOffers(self, offer):
         print("Human offer value: ", offer)

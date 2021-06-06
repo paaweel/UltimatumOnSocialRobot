@@ -3,26 +3,26 @@ language: plp
 
 # ================================ start ======================================
 
-u: (e:FrontTactilTouched) ^call(Events.resetListenFlag()) Chcesz ze mną zagrać w grę Ultimatum? ^sCall(Events.setListenFlag())
-  u1:([tak chcę chce poproszę poprosze "tak chcę"]) ^call(Events.resetListenFlag()) Super! $OnAskAboutRules=1
-  u1:(nie) ^call(Events.resetListenFlag()) Ojoj, trudno. Może innym razem.
+u: (e:FrontTactilTouched) ^sCall(Events.resetListenFlag()) Chcesz ze mną zagrać w grę Ultimatum? ^sCall(Events.setListenFlag())
+  u1:([tak chcę chce poproszę poprosze "tak chcę"]) ^sCall(Events.resetListenFlag()) Super! $OnAskAboutRules=1
+  u1:(nie) ^sCall(Events.resetListenFlag()) Ojoj, trudno. Może innym razem.
   u1: (e:Dialog/NoOneSpeak5) $OnStartGameRepeat=1
   u1: (*) $OnStartGameRepeat=1
 
-u: (e:OnStartGameRepeat) ^call(Events.resetListenFlag()) Tak czy nie? Czekam na decyzję. $FrontTactilTouched=1
+u: (e:OnStartGameRepeat) ^sCall(Events.resetListenFlag()) Tak czy nie? Czekam na decyzję. $FrontTactilTouched=1
 
 
 # ===================== pytanie o znajomosc zasad =============================
 
-u:(["Jakie są reguły gry?" "Jakie są zasady gry?" "Jak się w to gra"]) ^call(Events.resetListenFlag()) Już podaję. $OnExplainRules=1
+u:(["Jakie są reguły gry?" "Jakie są zasady gry?" "Jak się w to gra"]) ^sCall(Events.resetListenFlag()) Już podaję. $OnExplainRules=1
 
 u: (e:OnAskAboutRules) Znasz zasady gry Ultimatum?
-   u1: ([tak znam potwierdzam]) ^call(Events.resetListenFlag()) Dobrze, w takim razie zaczynamy. $OnStartRound=1
-   u1: ([nie "nie znam" może]) ^call(Events.resetListenFlag()) W takim razie wytłumaczę ci. $OnExplainRules=1
+   u1: ([tak znam potwierdzam]) ^sCall(Events.resetListenFlag()) Dobrze, w takim razie zaczynamy. $OnStartRound=1
+   u1: ([nie "nie znam" może]) ^sCall(Events.resetListenFlag()) W takim razie wytłumaczę ci. $OnExplainRules=1
    u1: (e:Dialog/NoOneSpeak5) $OnRulesQuestionRepeat=1
    u1: (*) $OnRulesQuestionRepeat=1
 
-u: (e:OnRulesQuestionRepeat) ^call(Events.resetListenFlag()) Proszę, odpowiedz tak lub nie. $OnAskAboutRules=1
+u: (e:OnRulesQuestionRepeat) ^sCall(Events.resetListenFlag()) Proszę, odpowiedz tak lub nie. $OnAskAboutRules=1
 
 
 # ============================= tresc zasad ===================================
@@ -33,10 +33,10 @@ u: (e:OnExplainRules) Wspólnie mamy dziesięć złotych. Za każdym razem musim
   u1: (e:Dialog/NoOneSpeak5) $OnExplainRulesRepeat=1
   u1: (*) $OnExplainRulesRepeat=1
 
-u: (e:OnUnderstootRules) ^call(Events.resetListenFlag()) W takim razie zaczynajmy! Najpierw ty proponujesz. $OnStartRound=1
-u: (e:OnNotUnderstootRules) ^call(Events.resetListenFlag()) Dobrze, w takim razie powtórzę jeszcze raz. $OnExplainRules=1
+u: (e:OnUnderstootRules) ^sCall(Events.resetListenFlag()) W takim razie zaczynajmy! Najpierw ty proponujesz. $OnStartRound=1
+u: (e:OnNotUnderstootRules) ^sCall(Events.resetListenFlag()) Dobrze, w takim razie powtórzę jeszcze raz. $OnExplainRules=1
 
-u: (e:OnExplainRulesRepeat) ^call(Events.resetListenFlag()) Nie zrozumiałem, musisz odpowiedzieć tak lub nie. ^sCall(Events.setListenFlag())
+u: (e:OnExplainRulesRepeat) ^sCall(Events.resetListenFlag()) Nie zrozumiałem, musisz odpowiedzieć tak lub nie. ^sCall(Events.setListenFlag())
   u1: (tak) $OnUnderstootRules=1
   u1: (nie) $OnNotUnderstootRules=1
   u1: (e:Dialog/NoOneSpeak5) $OnExplainRulesRepeat=1
@@ -46,35 +46,35 @@ u: (e:OnExplainRulesRepeat) ^call(Events.resetListenFlag()) Nie zrozumiałem, mu
 # ========================= czlowiek propnouje ================================
 
 u: (e:OnStartRound) Podaj swoją propozycję. ^sCall(Events.setListenFlag())
-   u1: (_[1 2 3 4 5 6 7 8 9]) ^call(Events.resetListenFlag()) Wybrałeś $1 $humanOffer=$1 ^call(Events.onHumanOffers($humanOffer))
+   u1: (_[1 2 3 4 5 6 7 8 9]) ^sCall(Events.resetListenFlag()) Wybrałeś $1 $humanOffer=$1 ^sCall(Events.onHumanOffers($humanOffer))
     c2: (True) Akceptuję, otrzymujesz $humanOffer $OnRobotOffers=1
     c2: (False) Nie akceptuję, zostajesz z niczym. $OnRobotOffers=1
    u1: (e:Dialog/NoOneSpeak5) $OnHumanOffersRepeat=1
    u1: (*) $OnHumanOffersRepeat=1
 
-u: (e:OnHumanOffersRepeat) ^call(Events.resetListenFlag()) Przypominam, że musisz podać liczbę od 1 do 9. $OnStartRound=1
+u: (e:OnHumanOffersRepeat) ^sCall(Events.resetListenFlag()) Przypominam, że musisz podać liczbę od 1 do 9. $OnStartRound=1
 
 
 # ========================= robot proponuje ===================================
 
-u: (e:OnRobotOffers) Ja proponuję ci ^call(Events.onDrawOffer())
+u: (e:OnRobotOffers) Ja proponuję ci ^sCall(Events.onDrawOffer())
 c1:(_*) $1 $robotOffer=$1 $OnAskIfHumanAccepts=1
 
 u: (e:OnAskIfHumanAccepts) Akceptujesz? ^sCall(Events.setListenFlag())
-   u2: ([tak akceptuję akceptuje akceptuje poproszę poprosze]) ^call(Events.resetListenFlag()) Wspaniale! Otrzymujesz $robotOffer ^call(Events.onHumanDecision("True")) $OnContinue=1
-   u2: ([nie "nie akceptuję" odrzucam spadaj nigdy]) ^call(Events.resetListenFlag()) W takim razie oboje nic nie otrzymujemy. ^call(Events.onHumanDecision("False")) $OnContinue=1
+   u2: ([tak akceptuję akceptuje akceptuje poproszę poprosze]) ^sCall(Events.resetListenFlag()) Wspaniale! Otrzymujesz $robotOffer ^sCall(Events.onHumanDecision("True")) $OnContinue=1
+   u2: ([nie "nie akceptuję" odrzucam spadaj nigdy]) ^sCall(Events.resetListenFlag()) W takim razie oboje nic nie otrzymujemy. ^sCall(Events.onHumanDecision("False")) $OnContinue=1
    u2: (e:Dialog/NoOneSpeak5) $OnRobotOffersRepeat=1
    u2: (*) $OnRobotOffersRepeat=1
 
-u: (e:OnRobotOffersRepeat) ^call(Events.resetListenFlag()) Nie zrozumiałem, musisz odpowiedzieć tak lub nie. $OnAskIfHumanAccepts=1
+u: (e:OnRobotOffersRepeat) ^sCall(Events.resetListenFlag()) Nie zrozumiałem, musisz odpowiedzieć tak lub nie. $OnAskIfHumanAccepts=1
 
 
 # =================================start=======================================
 
 u: (e:OnContinue) Chcesz zagać kolejną rundę? ^sCall(Events.setListenFlag())
-  u1: ([tak chcę poproszę poprosze]) ^call(Events.resetListenFlag()) Dobrze, gramy dalej! $OnStartRound=1
-  u1: ([nie "już tyle" "nie dziękuję"]) ^call(Events.resetListenFlag()) Tudno, dziękuję za świetną zabawę!
+  u1: ([tak chcę poproszę poprosze]) ^sCall(Events.resetListenFlag()) Dobrze, gramy dalej! $OnStartRound=1
+  u1: ([nie "już tyle" "nie dziękuję"]) ^sCall(Events.resetListenFlag()) Tudno, dziękuję za świetną zabawę!
   u1: (e:Dialog/NoOneSpeak5) $OnContinueRepeat=1
   u1: (*) $OnContinueRepeat=1
 
-u: (e:OnContinueRepeat) ^call(Events.resetListenFlag()) Nie zrozumiałem, musisz odpowiedzieć tak lub nie. $OnContinue=1
+u: (e:OnContinueRepeat) ^sCall(Events.resetListenFlag()) Nie zrozumiałem, musisz odpowiedzieć tak lub nie. $OnContinue=1

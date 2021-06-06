@@ -35,7 +35,7 @@ class SoundDetector():
     def stopListening(self):
         try:
             self.audioRecorder.stopMicrophonesRecording()
-            os.system('scp nao@nao.local:{0} .'.format(self.recPath))
+            os.system('scp nao@nao.local:{0} ./audio_files'.format(self.recPath))
             self.soundDetectionService.subscribe("SoundDetector")
         except:
             return

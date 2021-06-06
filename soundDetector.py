@@ -4,7 +4,7 @@ import argparse
 import sys
 import time
 import os
-
+from datetime import datetime
 
 
 class SoundDetector():
@@ -35,8 +35,11 @@ class SoundDetector():
     def stopListening(self):
         try:
             self.audioRecorder.stopMicrophonesRecording()
-            os.system('scp nao@nao.local:{0} ./audio_files'.format(self.recPath))
             self.soundDetectionService.subscribe("SoundDetector")
+            os.system('scp nao@nao.local:{0} ./audio_files'.format(self.recPath))
+            timestamp = datetime.now().strftime("%Y-%b-%d (%H:%M:%S.%f)")
+            os.system('mv {0} {1}'.format(os.path.join('/audio_files', /
+                os.path.basename(self.recPath)), timestamp))
         except:
             return
 

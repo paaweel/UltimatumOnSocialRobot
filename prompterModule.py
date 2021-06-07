@@ -3,8 +3,7 @@
 Prompts what to say during HRI.
 """
 import qi
-NAO_IP = "192.168.0.28"
-LANGUAGE="Polish"
+from config import Config
 
 
 def main():
@@ -12,18 +11,18 @@ def main():
     """
     session = qi.Session()
     try:
-        session.connect("tcp://" + NAO_IP)
+        session.connect("tcp://" + Config().ip)
         say_service = session.service("ALTextToSpeech")
-        say_service.setLanguage(LANGUAGE)
+        say_service.setLanguage(Config().language)
         print("Robot connected to SAY module.")
         print("Press CTRL+C to exit.")
         while(True):
             text = raw_input('Type what the robot should say and press ENTER:')
             say_service.say(text)
     except RuntimeError:
-        print("Can't connect to Nao at ip: " + NAO_IP)
+        print("Can't connect to Nao at ip: " + Config().ip)
     except KeyboardInterrupt:
-        print "Interrupted by user, shutting down"
+        print "Interruption received, shutting down"
 
 
 

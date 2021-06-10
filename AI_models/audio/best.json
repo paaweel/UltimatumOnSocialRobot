@@ -4,20 +4,6 @@
         "name": "sequential",
         "layers": [
             {
-                "class_name": "InputLayer",
-                "config": {
-                    "batch_input_shape": [
-                        null,
-                        162,
-                        1
-                    ],
-                    "dtype": "float32",
-                    "sparse": false,
-                    "ragged": false,
-                    "name": "conv1d_input"
-                }
-            },
-            {
                 "class_name": "Conv1D",
                 "config": {
                     "name": "conv1d",
@@ -40,7 +26,6 @@
                     "dilation_rate": [
                         1
                     ],
-                    "groups": 1,
                     "activation": "linear",
                     "use_bias": true,
                     "kernel_initializer": {
@@ -87,7 +72,6 @@
                     "dilation_rate": [
                         1
                     ],
-                    "groups": 1,
                     "activation": "linear",
                     "use_bias": true,
                     "kernel_initializer": {
@@ -161,7 +145,6 @@
                     "dilation_rate": [
                         1
                     ],
-                    "groups": 1,
                     "activation": "linear",
                     "use_bias": true,
                     "kernel_initializer": {
@@ -219,7 +202,6 @@
                     "dilation_rate": [
                         1
                     ],
-                    "groups": 1,
                     "activation": "linear",
                     "use_bias": true,
                     "kernel_initializer": {
@@ -294,6 +276,6 @@
             }
         ]
     },
-    "keras_version": "2.4.0",
+    "keras_version": "2.2.4-tf",
     "backend": "tensorflow"
 }

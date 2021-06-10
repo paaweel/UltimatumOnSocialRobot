@@ -25,7 +25,8 @@ class SoundDetector():
             try:
                 self.soundDetectionService.unsubscribe("SoundDetector")
                 self.audioRecorder.stopMicrophonesRecording()
-                self.audioRecorder.startMicrophonesRecording(self.recPath, "wav", 16000, self.channels)
+                self.audioRecorder.startMicrophonesRecording(self.recPath,\
+                "wav", 16000, self.channels)
             except:
                 return
 
@@ -36,10 +37,11 @@ class SoundDetector():
         try:
             self.audioRecorder.stopMicrophonesRecording()
             self.soundDetectionService.subscribe("SoundDetector")
-            os.system('scp nao@nao.local:{0} ./audio_files'.format(self.recPath))
             timestamp = datetime.now().strftime("%Y-%b-%d (%H:%M:%S.%f)")
-            os.system('mv {0} {1}'.format(os.path.join('/audio_files', /
-                os.path.basename(self.recPath)), timestamp))
+            oldName = os.path.join('/audio_files', os.path.basename(self.recPath))
+            newName = os.path.join('/audio_files', timestamp)
+            os.system('scp nao@nao.local:{0} ./audio_files && mv {1} {2} && '\
+            'python audioModule.py {2} &'.format(self.recPath, oldName, newName)
         except:
             return
 

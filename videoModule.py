@@ -73,6 +73,7 @@ class VideoModule:
 
         AI_MODELS_DIR = os.path.join(os.getcwd(), 'AI_models/vision')
         logging.debug('Loading model from ' + AI_MODELS_DIR)
+        # takes ~0.52s
         with open(os.path.join(AI_MODELS_DIR, 'best.json'), 'r') as json_file:
            txt_model = json_file.read()
            self.model = model_from_json(txt_model)
@@ -112,6 +113,7 @@ class VideoModule:
             predictedEmotion = np.argmax(predictions)
             print(predictedEmotion, predictions)
             self.videoEmotionsSocket.send(predictions)
+            logging.debug('VIDEO: {0} -> {1}'.format(predictedEmotion, predictions))
         self.faceDetection.subscribe("VideoModule")
 
 

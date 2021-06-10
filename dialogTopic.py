@@ -4,55 +4,50 @@
 import qi
 import sys
 
-NAO_IP = '192.168.0.31'
-PEPPER_IP = '192.168.1.123'
+from config import Config
 
-def runTopic(topic_path = "ultimatum.top"):
+from config import Config
+
+
+def load_topic(topic_path = "ultimatum.top"):
     session = qi.Session()
-    ip = NAO_IP
-    port = '9559'
+    ip = Config().ip
+    port = Config().port
     session.connect("tcp://{}:{}".format(ip, port))
     main(session, topic_path)
 
 def main(session, topic_path):
     """
-    This example uses ALDialog methods.
-    It's a short dialog session with one topic.
+    Load and run specified topic on the robot
     """
-    # Getting the service ALDialog
-    # Getting the service ALDialog
+
     ALDialog = session.service("ALDialog")
-    ALDialog.setLanguage("Polish")
+    ALDialog.setLanguage(Config().language)
 
     with open(topic_path, 'r') as f:
-        topic_content_1 = f.read()
+        topic_content = f.read()
 
-    # ALDialog.unloadTopic("triggerGame")
-
-    topic_name_1 = ALDialog.loadTopicContent(topic_content_1)
-    ALDialog.activateTopic(topic_name_1)
-    ALDialog.subscribe('my_dialog_example')
+    if topic_content == "":
+        print("Topic file is empty! Closing...")
+        sys.exit(1)
 
     try:
-        raw_input("\nSpeak to the robot using rules from both the activated topics. Press Enter when finished:")
-    finally:
-        # stopping the dialog engine
-        ALDialog.unsubscribe('my_dialog_example')
+        topic_name = ALDialog.loadTopicContent(topic_content)
+        ALDialog.activateTopic(topic_name)
+        ALDialog.subscribe('game_dialog')
 
-        # Deactivating all topics
-        ALDialog.deactivateTopic(topic_name_1)
+        raw_input("\nTopic loaded, press enter to exit...")
+    finally:
+        # stop the dialog engine
+        ALDialog.unsubscribe('game_dialog')
+        # Deactivate the topic
+        ALDialog.deactivateTopic(topic_name)
 
         # now that the dialog engine is stopped and there are no more activated topics,
-        # we can unload all topics and free the associated memory
-        ALDialog.unloadTopic(topic_name_1)
+        # we can unload the topics and free the associated memory
+        ALDialog.unloadTopic(topic_name)
         sys.exit(0)
 
+
 if __name__ == "__main__":
-    session = qi.Session()
-    ip = '192.168.0.31'
-    port = '9559'
-    session.connect("tcp://{}:{}".format(ip, port))
-
-    topic_path = "ultimatum.top"
-
-    main(session, topic_path)
+    load_topic()

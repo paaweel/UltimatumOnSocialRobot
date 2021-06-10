@@ -15,11 +15,10 @@ from tensorflow.keras.models import model_from_json
 from helperModule import *
 from keras.models import model_from_json
 
-NAO_IP = '192.168.0.28'
-PEPPER_IP = '192.168.1.123'
+from config import Config
 
 class VideoModule:
-    def __init__(self, ip=NAO_IP, port="9559"):
+    def __init__(self, ip=Config().ip, port=Config().port):
         # type: (str, str, str) -> None
         self.session = qi.Session()
         try:

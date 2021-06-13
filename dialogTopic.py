@@ -23,6 +23,8 @@ def main(session, topic_path):
 
     ALDialog = session.service("ALDialog")
     ALDialog.setLanguage(Config().language)
+    # self.proxy = ALProxy("ALProxy")
+    ALDialog.setASRConfidenceThreshold(0.2)
 
     with open(topic_path, 'r') as f:
         topic_content = f.read()

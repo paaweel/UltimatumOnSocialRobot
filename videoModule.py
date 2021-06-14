@@ -2,18 +2,12 @@ import random
 import numpy as np
 import qi
 from PIL import Image
-import array
-from collections import deque
-import zmq
 import time
 from datetime import datetime
 import logging
 # from dbConnector import DbConnector
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-from tensorflow.keras.models import model_from_json
-from helperModule import *
-from keras.models import model_from_json
 
 from config import Config
 
@@ -56,28 +50,7 @@ class VideoModule:
 
         logging.debug('Subscribing to a face detection service')
         self.faceDetection.subscribe("VideoModule")
-
-        # for baseline model we don't capture sequences,
-        # for sequences change into framesCnt = 3
-        self.framesCnt = 1
-        self.seqFrames = deque([], maxlen=self.framesCnt)
-
-        zmqSocket = "tcp://127.0.0.1:5559"
-        logging.debug('Opening PUSH ZMQ communication on '
-                    + zmqSocket
-                    + ' for facial emotion labels')
-        self.context = zmq.Context()
-        self.videoEmotionsSocket = self.context.socket(zmq.PUSH)
-        self.videoEmotionsSocket.bind(zmqSocket)
-
-        AI_MODELS_DIR = os.path.join(os.getcwd(), 'AI_models/vision')
-        logging.debug('Loading model from ' + AI_MODELS_DIR)
-        # takes ~0.52s
-        with open(os.path.join(AI_MODELS_DIR, 'best.json'), 'r') as json_file:
-           txt_model = json_file.read()
-           self.model = model_from_json(txt_model)
-           self.model.load_weights(os.path.join(AI_MODELS_DIR, 'best.hdf5'))
-           logging.debug('Model loading finished')
+        self.videoPath = './video_files'
 
     def closeConnection(self):
         logging.debug('Unsubscribing video and face detection services')
@@ -90,29 +63,22 @@ class VideoModule:
         except:
             return
         if value != []:
-            logging.debug('Human tracked, time: ' + datetime.now().strftime("%m/%d/%Y, %H:%M:%S"))
-            # there's an assumption human won't move much between 3 frames
-            # if frames too slow - change the cropping error tolerance in cropFace
-            for i in range(self.framesCnt):
-                result = self.videoService.getImageRemote(self.client)
-                if result is None:
-                    logging.error('Cannot capture frame')
-                elif result[6] is None:
-                    logging.error('No image data string')
-                elif self.width == None or self.height == None:
-                    self.width = result[0]
-                    self.height = result[1]
+            timestamp = datetime.now().strftime("%Y-%b-%d_%H:%M:%S.%f")
+            logging.debug('Human tracked, time: ' + timestamp)
+            result = self.videoService.getImageRemote(self.client)
+            if result is None:
+                logging.error('Cannot capture frame')
+            elif result[6] is None:
+                logging.error('No image data string')
+            elif self.width == None or self.height == None:
+                self.width = result[0]
+                self.height = result[1]
                 im = np.frombuffer(result[6], np.uint8).reshape(self.height, self.width, 3)
                 croppedFace = self.cropFace(im, value[1])
-                # Image.fromarray(croppedFace).show()
-                croppedBinVersor = np.expand_dims(rgb2gray(croppedFace), 2)
-                self.seqFrames.append(croppedBinVersor)
-            # put the 3-frame sequence into AI
-            predictions = self.model.predict(np.asarray(self.seqFrames))
-            predictedEmotion = np.argmax(predictions)
-            print(predictedEmotion, predictions)
-            self.videoEmotionsSocket.send(predictions)
-            logging.debug('VIDEO: {0} -> {1}'.format(predictedEmotion, predictions))
+                image = Image.fromarray(croppedFace)
+                imgPath = os.path.join(self.videoPath, timestamp)
+                image.save(imgPath)
+                os.system('python videoAnalyser.py {0} &'.format(imgPath))
         self.faceDetection.subscribe("VideoModule")
 
 

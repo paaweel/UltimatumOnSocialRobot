@@ -47,11 +47,9 @@ class EventsModule(ALModule):
         self.soundDetector = SoundDetector(session)
 
     def setListenFlag(self):
-        print("SETTING FLAG")
         self.soundDetector.waitForSound = True
 
     def resetListenFlag(self):
-        print("RESETING FLAG")
         if self.soundDetector.waitForSound:
             self.soundDetector.waitForSound = False
             self.soundDetector.stopListening()

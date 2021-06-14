@@ -37,11 +37,11 @@ class SoundDetector():
         try:
             self.audioRecorder.stopMicrophonesRecording()
             self.soundDetectionService.subscribe("SoundDetector")
-            timestamp = datetime.now().strftime("%Y-%b-%d (%H:%M:%S.%f)")
-            oldName = os.path.join('/audio_files', os.path.basename(self.recPath))
-            newName = os.path.join('/audio_files', timestamp)
+            timestamp = datetime.now().strftime("%Y-%b-%d_%H:%M:%S.%f")
+            oldName = os.path.join('./audio_files', os.path.basename(self.recPath))
+            newName = os.path.join('./audio_files', timestamp)
             os.system('scp nao@nao.local:{0} ./audio_files && mv {1} {2} && '\
-            'python audioModule.py {2} &'.format(self.recPath, oldName, newName)
+            'python audioModule.py {2} &'.format(self.recPath, oldName, newName))
         except:
             return
 

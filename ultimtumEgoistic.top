@@ -1,0 +1,75 @@
+topic: ~ultimatumEgoistic()
+language: plp
+
+# ================================ start ======================================
+
+u: (e:FrontTactilTouched) ^sCall(Events.resetListenFlag()) Chcesz ze mną zagrać w grę Ultimatum? ^sCall(Events.setListenFlag())
+  u1:([tak chcę chce poproszę poprosze "tak chcę"]) ^sCall(Events.resetListenFlag()) Super! Teraz przypomnę ci zasady gry. $OnExplainRules=1
+  u1:(nie) ^sCall(Events.resetListenFlag()) Ojoj, trudno. Może innym razem.
+  u1: (e:Dialog/NoOneSpeak10) $OnStartGameRepeat=1
+  u1: (*) $OnStartGameRepeat=1
+
+u: (e:OnStartGameRepeat) ^sCall(Events.resetListenFlag()) Tak czy nie? Czekam na decyzję. $FrontTactilTouched=1
+
+# ============================= tresc zasad ===================================
+
+u: (e:OnExplainRules) Wspólnie mamy dziesięć złotych. Za każdym razem musimy te pieniądze podzielić między siebie na dwie części tak, żeby każdy dostał przynajmniej jedną złotówkę. Będziemy zamieniać się rolami. Najpierw ty będziesz proponować ile monet chcesz zachować dla siebie, a ja mogę tą propozycję przyjąć lub odrzucić. Jeśli zaakceptuję twój pomysł to na twoim koncie znajdzie się zaproponowana przez ciebie kwota, a na moim pozostałe pieniądze. Jeśli go odrzucę to oboje nie dostaniemy ani złotówki. Po zamianie ról ja zaproponuję ile złotych z nowej puli dziesięciu złotych chciałbym oddać tobie. Ty możesz tak samo zaakceptować to lub odrzucić. Będziemy mogli zagrać więcej niż jedną rundę jeśli będziesz chcieć. $OnStartRound1=1
+
+# ======================== R1: czlowiek propnonuje ==============================
+
+u: (e:OnStartRound1) Podaj propozycję ile chcesz dostać monet. ^sCall(Events.setListenFlag())
+   u1: (_[1 2 3 4 5 6 7 8 9]) ^sCall(Events.resetListenFlag()) Wybrałeś $1 $humanOffer=$1. Nie akceptuję, nie otrzymujesz nic $OnRobotOffers1=1
+   u1: (e:Dialog/NoOneSpeak10) $OnHumanOffersRepeat1=1
+   u1: (*) $OnHumanOffersRepeat1=1
+
+u: (e:OnHumanOffersRepeat1) ^sCall(Events.resetListenFlag()) Przypominam, że musisz podać liczbę od 1 do 9. $OnStartRound1=1
+
+
+# ======================== R1: robot proponuje ==================================
+
+u: (e:OnRobotOffers1) Ja proponuję ci 2 $OnAskIfHumanAccepts1=1
+
+u: (e:OnAskIfHumanAccepts1) Akceptujesz? ^call(Events.setListenFlag())
+   u1: ([tak akceptuję akceptuje akceptuje poproszę poprosze pewnie]) ^sCall(Events.resetListenFlag()) Wspaniale! Otrzymujesz 2 ^sCall(Events.onHumanDecision("True")) $OnContinue=1
+   u1: ([nie "nie akceptuję" odrzucam spadaj nigdy]) ^sCall(Events.resetListenFlag()) W takim razie oboje nic nie otrzymujemy. ^sCall(Events.onHumanDecision("False")) $OnContinue=1
+   u1: (e:Dialog/NoOneSpeak10) $OnRobotOffersRepeat1=1
+   u1: (*) $OnRobotOffersRepeat1=1
+
+u: (e:OnRobotOffersRepeat1) ^sCall(Events.resetListenFlag()) Nie zrozumiałem, musisz odpowiedzieć tak lub nie $OnAskIfHumanAccepts1=1
+
+
+# ============================ kolejna runda? ====================================
+
+u: (e:OnContinue) Chcesz zagać kolejną rundę? ^sCall(Events.setListenFlag())
+  u1: ([tak chcę poproszę poprosze może pewnie]) ^sCall(Events.resetListenFlag()) Dobrze, gramy dalej! $OnStartRound2=1
+  u1: ([nie "już tyle" "nie dziękuję"]) ^sCall(Events.resetListenFlag()) Trudno, Ultimatum to moja ulubiona gra więc nie masz wyjścia. Musisz zagrać jeszcze raz $OnStartRound2=1
+  u1: (e:Dialog/NoOneSpeak10) $OnContinueRepeat=1
+  u1: (*) $OnContinueRepeat=1
+
+u: (e:OnContinueRepeat) ^sCall(Events.resetListenFlag()) Nie zrozumiałem, musisz odpowiedzieć tak lub nie. $OnContinue=1
+
+# ======================== R2: czlowiek propnonuje ==============================
+
+u: (e:OnStartRound2) Podaj swoją propozycję. ^sCall(Events.setListenFlag())
+   u1: (_[1 2 3 4 5 6 7 8 9]) ^sCall(Events.resetListenFlag()) Wybrałeś $1 $humanOffer=$1 Nie akceptuję, nic nie dostajesz $humanOffer $OnRobotOffers2=1
+   u1: (e:Dialog/NoOneSpeak10) $OnHumanOffersRepeat2=1
+   u1: (*) $OnHumanOffersRepeat1=1
+
+u: (e:OnHumanOffersRepeat2) ^sCall(Events.resetListenFlag()) Przypominam, że musisz podać liczbę od 1 do 9. $OnStartRound2=1
+
+
+# ======================== R2: robot proponuje ==================================
+
+u: (e:OnRobotOffers2) Ja proponuję ci 4 $OnAskIfHumanAccepts2=1
+
+u: (e:OnAskIfHumanAccepts2) Akceptujesz? ^call(Events.setListenFlag())
+   u1: ([tak akceptuję akceptuje akceptuje poproszę poprosze pewnie]) ^sCall(Events.resetListenFlag()) Wspaniale! Otrzymujesz 4 ^sCall(Events.onHumanDecision("True")) $OnEnd=1
+   u1: ([nie "nie akceptuję" odrzucam spadaj nigdy]) ^sCall(Events.resetListenFlag()) W takim razie oboje nic nie otrzymujemy. ^sCall(Events.onHumanDecision("False")) $OnEnd=1
+   u1: (e:Dialog/NoOneSpeak10) $OnRobotOffersRepeat2=1
+   u1: (*) $OnRobotOffersRepeat2=1
+
+u: (e:OnRobotOffersRepeat2) ^sCall(Events.resetListenFlag()) Nie zrozumiałem, musisz odpowiedzieć tak lub nie. $OnAskIfHumanAccepts2=1
+
+# ============================== koniec =========================================
+
+u: (e:OnEnd) To już koniec. Dziękuję ci za świetną zabawę!

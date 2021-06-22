@@ -3,18 +3,15 @@
 
 import qi
 import sys
-
-from config import Config
-
 from config import Config
 
 
-def load_topic(topic_path = "ultimatum.top"):
+def load_topic():
     session = qi.Session()
     ip = Config().ip
     port = Config().port
     session.connect("tcp://{}:{}".format(ip, port))
-    main(session, topic_path)
+    main(session, Config().version)
 
 def main(session, topic_path):
     """
@@ -40,15 +37,17 @@ def main(session, topic_path):
 
         raw_input("\nTopic loaded, press enter to exit...")
     finally:
-        # stop the dialog engine
-        ALDialog.unsubscribe('game_dialog')
-        # Deactivate the topic
-        ALDialog.deactivateTopic(topic_name)
+        try:
+            # stop the dialog engine
+            ALDialog.unsubscribe('game_dialog')
+        finally:
+            # Deactivate the topic
+            ALDialog.deactivateTopic(topic_name)
 
-        # now that the dialog engine is stopped and there are no more activated topics,
-        # we can unload the topics and free the associated memory
-        ALDialog.unloadTopic(topic_name)
-        sys.exit(0)
+            # now that the dialog engine is stopped and there are no more activated topics,
+            # we can unload the topics and free the associated memory
+            ALDialog.unloadTopic(topic_name)
+            sys.exit(0)
 
 
 if __name__ == "__main__":

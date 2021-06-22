@@ -16,10 +16,9 @@ from optparse import OptionParser
 
 from game import UltimatumGame
 from soundDetector import SoundDetector
-
-NAO_IP = "nao.local"
-NAO_IP2 = '192.168.0.31'
-PEPPER_IP = '192.168.1.123'
+from config import Config
+import csv
+from datetime import datetime
 
 
 # Global variable to store the HumanGreeter module instance
@@ -45,6 +44,23 @@ class EventsModule(ALModule):
         memory = ALProxy("ALMemory")
         self.ultimatumGame = UltimatumGame()
         self.soundDetector = SoundDetector(session)
+        self.currentGameAudioCsv = ""
+        self.currentGameVideoCsv = ""
+
+    def onNewGame(self):
+        timestamp = datetime.now().strftime("%Y-%b-%d_%H:%M:%S")
+        self.currentGameAudioCsv = '{2}/v-{0}-{1}.csv'.format(Config().version.split('.')[0], timestamp, Config().classifierOutputAudioPath)
+        with open(self.currentGameAudioCsv, 'w') as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=Config().audioHeader)
+            writer.writeheader()
+
+        # launch videoModule here (with a separate process / thread)
+        # pass an argument with csv path
+        # after the game finishes make sure the process is dead
+        self.currentGameVideoCsv = '{2}/v-{0}-{1}.csv'.format(Config().version.split('.')[0], timestamp, Config().classifierOutputVideoPath)
+        with open(self.currentGameVideoCsv, 'w') as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=Config().videoHeader)
+            writer.writeheader()
 
     def setListenFlag(self):
         self.soundDetector.waitForSound = True
@@ -52,7 +68,7 @@ class EventsModule(ALModule):
     def resetListenFlag(self):
         if self.soundDetector.waitForSound:
             self.soundDetector.waitForSound = False
-            self.soundDetector.stopListening()
+            self.soundDetector.stopListening(self.currentGameAudioCsv)
 
     def onHumanOffers(self, offer):
         print("Human offer value: ", offer)
@@ -94,8 +110,8 @@ def runEventListener():
         dest="pport",
         type="int")
     parser.set_defaults(
-        pip=NAO_IP,
-        pport=9559)
+        pip=Config().ip,
+        pport=Config().port)
 
     (opts, args_) = parser.parse_args()
     pip   = opts.pip
@@ -112,9 +128,9 @@ def runEventListener():
 
     session = qi.Session()
     try:
-        session.connect("tcp://" + NAO_IP2 + ":" + str(pport))
+        session.connect("tcp://" + Config().ip + ":" + str(pport))
     except RuntimeError:
-        print ("Can't connect to Naoqi at ip \"" + NAO_IP2 + "\" on port " + str(pport) +".\n"
+        print ("Can't connect to Naoqi at ip \"" + Config().ip + "\" on port " + str(pport) +".\n"
                "Please check your script arguments. Run with -h option for help.")
         sys.exit(1)
     # Warning: HumanGreeter must be a global variable

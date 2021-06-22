@@ -5,6 +5,7 @@ import sys
 import time
 import os
 from datetime import datetime
+from config import Config
 
 
 class SoundDetector():
@@ -33,15 +34,17 @@ class SoundDetector():
         else:
             return
 
-    def stopListening(self):
+    def stopListening(self, currentGameAudioCsv):
         try:
             self.audioRecorder.stopMicrophonesRecording()
             self.soundDetectionService.subscribe("SoundDetector")
-            timestamp = datetime.now().strftime("%Y-%b-%d_%H:%M:%S.%f")
-            oldName = os.path.join('./audio_files', os.path.basename(self.recPath))
-            newName = os.path.join('./audio_files', timestamp)
-            os.system('scp nao@nao.local:{0} ./audio_files && mv {1} {2} && '\
-            'python audioModule.py {2} &'.format(self.recPath, oldName, newName))
+            timestamp = datetime.now().strftime("%Y-%b-%d_%H:%M:%S,%f")
+            oldName = '{0}/{1}'.format(Config().audioPath, os.path.basename(self.recPath))
+            newName = '{0}/{1}'.format(Config().audioPath, timestamp)
+            command = 'scp nao@{0}:{1} {4} && mv {2} {3} && '\
+            'python audioModule.py {3} {5} &'.format(Config().ip, self.recPath, \
+            oldName, newName, Config().audioPath, currentGameAudioCsv)
+            os.system(command)
         except:
             return
 

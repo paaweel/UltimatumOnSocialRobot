@@ -12,11 +12,14 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 from tensorflow.keras.models import model_from_json
 import sys
+import csv
+from config import Config
 
 
 class AudioModule:
-    def __init__(self, audioPath):
+    def __init__(self, audioPath, currentGameAudioCsv):
         self.audioPath = audioPath
+        self.currentGameAudioCsv = currentGameAudioCsv
         zmqSocket = "tcp://127.0.0.1:5558"
         # logging.debug('Opening PUSH ZMQ communication on '
         #     + zmqSocket
@@ -64,17 +67,28 @@ class AudioModule:
         audioFeatures = self.extract_features(data, sr)
         predictions = self.model.predict(np.expand_dims(audioFeatures, axis=0))
         predictedEmotion = np.argmax(predictions)
-        print(predictedEmotion, predictions)
         # self.audioEmotionsSocket.send(predictions)
         logging.debug('AUDIO {0}: {1} -> {2}'.format(path, predictedEmotion, predictions))
+        with open(self.currentGameAudioCsv, 'a') as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=Config().audioHeader)
+            writer.writerow({\
+            'filename': os.path.basename(path), \
+            'max_emotion': predictedEmotion, \
+            'emotion_label': Config().audioLabels[predictedEmotion], \
+            'AN': predictions[0][0], \
+            'DI': predictions[0][1], \
+            'FE': predictions[0][2], \
+            'HA': predictions[0][3], \
+            'NE': predictions[0][4], \
+            'SA': predictions[0][5]})
 
 
 if __name__ == "__main__":
     # db = DbConnector()
     logging.basicConfig(filename='audioModule.log',level=logging.DEBUG)
-    if len(sys.argv) != 2:
-        logging.debug('Incorrect number of arguments, required 1 with'\
-        'audio file path')
+    if len(sys.argv) != 3:
+        logging.debug('Incorrect number of arguments, required 2 with'\
+        'audio file path and current game CSV')
         sys.exit(5)
-    audioClassifier = AudioModule(str(sys.argv[1]))
+    audioClassifier = AudioModule(str(sys.argv[1]), str(sys.argv[2]))
     audioClassifier.analyse(audioClassifier.audioPath)

@@ -50,7 +50,6 @@ class VideoModule:
 
         logging.debug('Subscribing to a face detection service')
         self.faceDetection.subscribe("VideoModule")
-        self.videoPath = './video_files'
 
     def closeConnection(self):
         logging.debug('Unsubscribing video and face detection services')
@@ -63,22 +62,24 @@ class VideoModule:
         except:
             return
         if value != []:
-            timestamp = datetime.now().strftime("%Y-%b-%d_%H:%M:%S.%f")
+            timestamp = datetime.now().strftime("%Y-%b-%d_%H:%M:%S,%f")
             logging.debug('Human tracked, time: ' + timestamp)
             result = self.videoService.getImageRemote(self.client)
             if result is None:
                 logging.error('Cannot capture frame')
+                return
             elif result[6] is None:
                 logging.error('No image data string')
+                return
             elif self.width == None or self.height == None:
                 self.width = result[0]
                 self.height = result[1]
-                im = np.frombuffer(result[6], np.uint8).reshape(self.height, self.width, 3)
-                croppedFace = self.cropFace(im, value[1])
-                image = Image.fromarray(croppedFace)
-                imgPath = os.path.join(self.videoPath, timestamp)
-                image.save(imgPath)
-                os.system('python videoAnalyser.py {0} &'.format(imgPath))
+            im = np.frombuffer(result[6], np.uint8).reshape(self.height, self.width, 3)
+            croppedFace = self.cropFace(im, value[1])
+            image = Image.fromarray(croppedFace)
+            imgPath = os.path.join(Cofig().videoPath, timestamp + ".jpg")
+            image.save(imgPath)
+            os.system('python videoAnalyser.py {0} &'.format(imgPath))
         self.faceDetection.subscribe("VideoModule")
 
 

@@ -19,7 +19,8 @@ from soundDetector import SoundDetector
 from config import Config
 import csv
 from datetime import datetime
-from multiprocessing import Process
+import subprocess
+import signal
 
 
 # Global variable to store the HumanGreeter module instance
@@ -47,6 +48,7 @@ class EventsModule(ALModule):
         self.soundDetector = SoundDetector(session)
         self.currentGameAudioCsv = ""
         self.currentGameVideoCsv = ""
+        self.videoProcess = None
 
     def onNewGame(self):
         timestamp = datetime.now().strftime("%Y-%b-%d_%H:%M:%S")
@@ -60,13 +62,23 @@ class EventsModule(ALModule):
             writer = csv.DictWriter(csvfile, fieldnames=Config().videoHeader)
             writer.writeheader()
 
+        poll = self.videoProcess.poll()
+        if poll is None:
+            # subprocess is alive
+            print("subprocess was alive")
+            self.videoProcess.send_signal(signal.SIGINT)
+        self.videoProces = subprocess.Popen(["python", "videoModule.py"])
+
+    def onGameFinished():
+        self.videoProcess.send_signal(signal.SIGINT)
+
     def setListenFlag(self):
         self.soundDetector.waitForSound = True
 
     def resetListenFlag(self):
         if self.soundDetector.waitForSound:
             self.soundDetector.waitForSound = False
-            self.soundDetector.stopListening(self.currentGameAudioCsv)
+            self.soundDetector.stopListening()
 
     def onHumanOffers(self, offer):
         print("Human offer value: ", offer)

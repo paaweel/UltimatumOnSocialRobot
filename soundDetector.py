@@ -34,16 +34,15 @@ class SoundDetector():
         else:
             return
 
-    def stopListening(self, currentGameAudioCsv):
+    def stopListening(self):
         try:
             self.audioRecorder.stopMicrophonesRecording()
             self.soundDetectionService.subscribe("SoundDetector")
             timestamp = datetime.now().strftime("%Y-%b-%d_%H:%M:%S,%f")
             oldName = '{0}/{1}'.format(Config().audioPath, os.path.basename(self.recPath))
-            newName = '{0}/{1}'.format(Config().audioPath, timestamp)
-            command = 'scp nao@{0}:{1} {4} && mv {2} {3} && '\
-            'python audioModule.py {3} {5} &'.format(Config().ip, self.recPath, \
-            oldName, newName, Config().audioPath, currentGameAudioCsv)
+            newName = '{0}/{1}'.format(Config().audioPath, timestamp + ".wav")
+            command = 'scp nao@{0}:{1} {2} && mv {3} {4} && python audioModule.py {4} &'\
+            .format(Config().ip, self.recPath, Config().audioPath, oldName, newName)
             os.system(command)
         except:
             return

@@ -110,7 +110,6 @@ class VideoModule:
 
 
 if __name__ == "__main__":
-    # db = DbConnector()
     logging.basicConfig(filename='videoModule.log',level=logging.DEBUG)
     logging.debug('Starting video module')
     camera = VideoModule()
@@ -121,4 +120,4 @@ if __name__ == "__main__":
         logging.debug('Got KeyboardInterrupt from the user')
 
     camera.closeConnection()
-    logging.debug('Exitting video module')
+    logging.debug('Exiting video module')

@@ -14,12 +14,12 @@ from tensorflow.keras.models import model_from_json
 import sys
 import csv
 from config import Config
+import glob
 
 
 class AudioModule:
-    def __init__(self, audioPath, currentGameAudioCsv):
+    def __init__(self, audioPath):
         self.audioPath = audioPath
-        self.currentGameAudioCsv = currentGameAudioCsv
         zmqSocket = "tcp://127.0.0.1:5558"
         # logging.debug('Opening PUSH ZMQ communication on '
         #     + zmqSocket
@@ -34,6 +34,9 @@ class AudioModule:
             txt_model = json_file.read()
             self.model = model_from_json(txt_model)
             self.model.load_weights(os.path.join(AI_MODELS_DIR, 'best.hdf5'))
+        self.currentGameAudioCsv = sorted(glob.glob(\
+        Config().classifierOutputAudioPath + '/*'),\
+        key = os.path.getmtime)[-1]
 
 
     def extract_features(self, data, sr):
@@ -69,7 +72,7 @@ class AudioModule:
         predictedEmotion = np.argmax(predictions)
         # self.audioEmotionsSocket.send(predictions)
         logging.debug('AUDIO {0}: {1} -> {2}'.format(path, predictedEmotion, predictions))
-        with open(self.currentGameAudioCsv, 'a') as csvfile:
+        with open(self.currentGameAudioCsv + ".csv", 'a') as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=Config().audioHeader)
             writer.writerow({\
             'filename': os.path.basename(path), \
@@ -86,9 +89,9 @@ class AudioModule:
 if __name__ == "__main__":
     # db = DbConnector()
     logging.basicConfig(filename='audioModule.log',level=logging.DEBUG)
-    if len(sys.argv) != 3:
+    if len(sys.argv) != 2:
         logging.debug('Incorrect number of arguments, required 2 with'\
         'audio file path and current game CSV')
         sys.exit(5)
-    audioClassifier = AudioModule(str(sys.argv[1]), str(sys.argv[2]))
+    audioClassifier = AudioModule(str(sys.argv[1]))
     audioClassifier.analyse(audioClassifier.audioPath)

@@ -72,7 +72,7 @@ u: (e:OnRobotOffersRepeat) ^sCall(Events.resetListenFlag()) Nie zrozumiałem, mu
 
 u: (e:OnContinue) Chcesz zagać kolejną rundę? ^sCall(Events.setListenFlag())
   u1: ([tak chcę poproszę poprosze może pewnie]) ^sCall(Events.resetListenFlag()) Dobrze, gramy dalej! $OnStartRound=1
-  u1: ([nie "już tyle" "nie dziękuję"]) ^sCall(Events.resetListenFlag()) Trudno, dziękuję za świetną zabawę!
+  u1: ([nie "już tyle" "nie dziękuję"]) ^sCall(Events.resetListenFlag()) Trudno, dziękuję za świetną zabawę! ^sCall(Events.onGameFinished())
   u1: (e:Dialog/NoOneSpeak10) $OnContinueRepeat=1
   u1: (*) $OnContinueRepeat=1
 

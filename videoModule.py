@@ -62,8 +62,6 @@ class VideoModule:
         except:
             return
         if value != []:
-            timestamp = datetime.now().strftime("%Y-%b-%d_%H:%M:%S,%f")
-            logging.debug('Human tracked, time: ' + timestamp)
             result = self.videoService.getImageRemote(self.client)
             if result is None:
                 logging.error('Cannot capture frame')
@@ -74,12 +72,19 @@ class VideoModule:
             elif self.width == None or self.height == None:
                 self.width = result[0]
                 self.height = result[1]
+            timestamp = datetime.now().strftime("%Y-%b-%d_%H:%M:%S,%f")
+            logging.debug('Human tracked, time: ' + timestamp)
+            # fullImgPath = os.path.join(Config().videoPath, "FULL" + timestamp + ".jpg")
             im = np.frombuffer(result[6], np.uint8).reshape(self.height, self.width, 3)
+            # fullImage = Image.fromarray(im)
+            # fullImage.save(fullImgPath)
+            imgPath = os.path.join(Config().videoPath, timestamp + ".jpg")
             croppedFace = self.cropFace(im, value[1])
             image = Image.fromarray(croppedFace)
-            imgPath = os.path.join(Cofig().videoPath, timestamp + ".jpg")
             image.save(imgPath)
             os.system('python videoAnalyser.py {0} &'.format(imgPath))
+            # with open(timestamp + '.txt', 'w') as f:
+            #     f.write(str(value[1]))
         self.faceDetection.subscribe("VideoModule")
 
 
@@ -88,19 +93,19 @@ class VideoModule:
         alpha = faceInfo[0][0][1]
         beta = faceInfo[0][0][2]
 
-        # +5% error tolerance
-        faceWidth = (faceInfo[0][0][3] + 0.05) * self.width
-        faceHeight = (faceInfo[0][0][4] + 0.05) * self.height
+        # +5% error tolerance and keep 1:1 ratio:
+        imgSize = max((faceInfo[0][0][3] + 0.10) * self.width,\
+        (faceInfo[0][0][4] + 0.10) * self.height)
 
         faceCenterX = int(-1*(alpha-0.5)*self.width)
         faceCenterY = int((beta+0.5)*self.height)
 
-        faceX1 = int(faceCenterX - (faceWidth / 2))
-        faceY1 = int(faceCenterY - (faceWidth / 2))
-        faceX2 = int(faceCenterX + (faceWidth / 2))
-        faceY2 = int(faceCenterY + (faceWidth / 2))
+        faceX1 = int(faceCenterX - (imgSize / 2))
+        faceY1 = int(faceCenterY - (imgSize / 2))
+        faceX2 = int(faceCenterX + (imgSize / 2))
+        faceY2 = int(faceCenterY + (imgSize / 2))
 
-        faceImg = img.crop((faceX1, self.height-faceY1, faceX2, faceY2))
+        faceImg = img.crop((faceX1, faceY1, faceX2, faceY2))
         return np.array(faceImg.resize((96, 96), Image.BILINEAR))
 
 

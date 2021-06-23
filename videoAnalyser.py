@@ -6,6 +6,9 @@ from tensorflow.keras.models import model_from_json
 import zmq
 from PIL import Image
 import numpy as np
+from config import Config
+import glob
+import csv
 
 
 def rgb2gray(img):
@@ -29,6 +32,9 @@ class VideoAnalyser:
             txt_model = json_file.read()
             self.model = model_from_json(txt_model)
             self.model.load_weights(os.path.join(AI_MODELS_DIR, 'best.hdf5'))
+        self.currentGameVideoCsv = sorted(glob.glob(\
+        Config().classifierOutputVideoPath + '/*'),\
+        key = os.path.getmtime)[-1]
 
 
     def analyse(self, path):
@@ -39,6 +45,17 @@ class VideoAnalyser:
         predictedEmotion = np.argmax(predictions)
         # self.videoEmotionsSocket.send(predictions)
         logging.debug('VIDEO {0}: {1} -> {2}'.format(path, predictedEmotion, predictions))
+        with open(self.currentGameVideoCsv, 'a') as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=Config().videoHeader)
+            writer.writerow({\
+            'filename': os.path.basename(path), \
+            'max_emotion': predictedEmotion, \
+            'emotion_label': Config().videoLabels[predictedEmotion], \
+            'AN': predictions[0][0], \
+            'FE': predictions[0][1], \
+            'HA': predictions[0][2], \
+            'SA': predictions[0][3], \
+            'SU': predictions[0][4]})
 
 
 if __name__ == "__main__":

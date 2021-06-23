@@ -19,6 +19,7 @@ from soundDetector import SoundDetector
 from config import Config
 import csv
 from datetime import datetime
+from multiprocessing import Process
 
 
 # Global variable to store the HumanGreeter module instance
@@ -54,9 +55,6 @@ class EventsModule(ALModule):
             writer = csv.DictWriter(csvfile, fieldnames=Config().audioHeader)
             writer.writeheader()
 
-        # launch videoModule here (with a separate process / thread)
-        # pass an argument with csv path
-        # after the game finishes make sure the process is dead
         self.currentGameVideoCsv = '{2}/v-{0}-{1}.csv'.format(Config().version.split('.')[0], timestamp, Config().classifierOutputVideoPath)
         with open(self.currentGameVideoCsv, 'w') as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=Config().videoHeader)

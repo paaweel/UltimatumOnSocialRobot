@@ -37,17 +37,14 @@ def main(session, topic_path):
 
         raw_input("\nTopic loaded, press enter to exit...")
     finally:
-        try:
-            # stop the dialog engine
-            ALDialog.unsubscribe('game_dialog')
-        finally:
-            # Deactivate the topic
-            ALDialog.deactivateTopic(topic_name)
+        ALDialog.unsubscribe('game_dialog')
+        # Deactivate the topic
+        ALDialog.deactivateTopic(topic_name)
 
-            # now that the dialog engine is stopped and there are no more activated topics,
-            # we can unload the topics and free the associated memory
-            ALDialog.unloadTopic(topic_name)
-            sys.exit(0)
+        # now that the dialog engine is stopped and there are no more activated topics,
+        # we can unload the topics and free the associated memory
+        ALDialog.unloadTopic(topic_name)
+        sys.exit(0)
 
 
 if __name__ == "__main__":

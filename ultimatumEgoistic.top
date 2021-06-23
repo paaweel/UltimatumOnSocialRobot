@@ -19,8 +19,7 @@ u: (e:OnExplainRules) $OnStartRound1=1
 # ======================== R1: czlowiek propnonuje ==============================
 
 u: (e:OnStartRound1) Podaj swoją propozycję. ^sCall(Events.setListenFlag())
-   u1: (_[1 2 3 4 5 6 7 8 9]) ^sCall(Events.resetListenFlag()) Wybrałeś $1 $humanOffer=$1 ^call(Events.onHumanOffers($humanOffer))
-    c2: (*) Nie akceptuję, nie otrzymujesz nic! $OnRobotOffers1=1
+   u1: (_[1 2 3 4 5 6 7 8 9]) ^sCall(Events.resetListenFlag()) Wybrałeś $1 $humanOffer=$1 Nie akceptuję, nie otrzymujesz nic! $OnRobotOffers1=1
    u1: (e:Dialog/NoOneSpeak10) $OnHumanOffersRepeat1=1
    u1: (*) $OnHumanOffersRepeat1=1
 

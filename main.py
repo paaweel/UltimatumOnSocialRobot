@@ -2,8 +2,8 @@
 #-*- coding: utf-8 -*-
 
 from threading import Thread
-from dialogTopic import runTopic
-from eventController import runEventListener
+from dialogTopic import load_topic
+from eventsModule import runEventListener
 import time
 import sys
 
@@ -18,7 +18,7 @@ def stop(topicThread, eventThread):
     eventThread.join()
 
 if __name__ == '__main__':
-    topicThread = Thread(target=runTopic)
+    topicThread = Thread(target=load_topic)
     eventThread = Thread(target=runEventListener)
     start(topicThread, eventThread)
     try:
@@ -26,4 +26,6 @@ if __name__ == '__main__':
         print "Shutting down"
     except KeyboardInterrupt:
         print "Shutting down"
+    topicThread.join()
+    eventThread.join()
     sys.exit(0)

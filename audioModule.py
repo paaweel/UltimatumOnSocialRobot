@@ -24,9 +24,9 @@ class AudioModule:
         # logging.debug('Opening PUSH ZMQ communication on '
         #     + zmqSocket
         #     + ' for audio emotion labels')
-        self.context = zmq.Context()
-        self.audioEmotionsSocket = self.context.socket(zmq.PUSH)
-        self.audioEmotionsSocket.bind(zmqSocket)
+        # self.context = zmq.Context()
+        # self.audioEmotionsSocket = self.context.socket(zmq.PUSH)
+        # self.audioEmotionsSocket.bind(zmqSocket)
 
         AI_MODELS_DIR = os.path.join(os.getcwd(), 'AI_models/audio')
         # think about changing to one-time loading, takes ~ 0.15s
@@ -34,9 +34,6 @@ class AudioModule:
             txt_model = json_file.read()
             self.model = model_from_json(txt_model)
             self.model.load_weights(os.path.join(AI_MODELS_DIR, 'best.hdf5'))
-        self.currentGameAudioCsv = sorted(glob.glob(\
-        Config().classifierOutputAudioPath + '/*'),\
-        key = os.path.getmtime)[-1]
 
 
     def extract_features(self, data, sr):
@@ -72,7 +69,10 @@ class AudioModule:
         predictedEmotion = np.argmax(predictions)
         # self.audioEmotionsSocket.send(predictions)
         logging.debug('AUDIO {0}: {1} -> {2}'.format(path, predictedEmotion, predictions))
-        with open(self.currentGameAudioCsv + ".csv", 'a') as csvfile:
+        currentGameAudioCsv = sorted(glob.glob(\
+        Config().classifierOutputAudioPath + '/*'),\
+        key = os.path.getmtime)[-1]
+        with open(currentGameAudioCsv, 'a') as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=Config().audioHeader)
             writer.writerow({\
             'filename': os.path.basename(path), \
@@ -88,10 +88,10 @@ class AudioModule:
 
 if __name__ == "__main__":
     # db = DbConnector()
-    logging.basicConfig(filename='audioModule.log',level=logging.DEBUG)
+    logging.basicConfig(filename='logs/audioModule.log',level=logging.DEBUG)
     if len(sys.argv) != 2:
-        logging.debug('Incorrect number of arguments, required 2 with'\
-        'audio file path and current game CSV')
+        logging.debug('Incorrect number of arguments, required 1 with'\
+        'audio file path')
         sys.exit(5)
     audioClassifier = AudioModule(str(sys.argv[1]))
     audioClassifier.analyse(audioClassifier.audioPath)

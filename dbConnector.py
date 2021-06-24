@@ -34,7 +34,7 @@ class DbConnector:
 
 
 if __name__ == "__main__":
-    logging.basicConfig(filename='videoModule.log',level=logging.DEBUG)
+    logging.basicConfig(filename='logs/videoModule.log',level=logging.DEBUG)
     logging.debug('Starting database module')
     db = DbConnector()
     logging.debug('Exitting database module')

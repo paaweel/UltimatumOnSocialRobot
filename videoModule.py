@@ -5,14 +5,14 @@ from PIL import Image
 import time
 from datetime import datetime
 import logging
-# from dbConnector import DbConnector
+import sys
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 from config import Config
 
 class VideoModule:
-    def __init__(self, ip=Config().ip, port=Config().port):
+    def __init__(self, gameDirName, ip=Config().ip, port=Config().port):
         # type: (str, str, str) -> None
         self.session = qi.Session()
         try:
@@ -31,6 +31,7 @@ class VideoModule:
                   + "Please check your script arguments. "
                   + "Run with -h option for help.")
         # logging.debug('Subscribing to a video service')
+        self.gameDirName = gameDirName
         self.resolution = 2
         self.colorSpace = 11
         self.fps = 20
@@ -74,17 +75,12 @@ class VideoModule:
                 self.height = result[1]
             timestamp = datetime.now().strftime("%Y-%b-%d_%H:%M:%S,%f")
             logging.debug('Human tracked, time: ' + timestamp)
-            # fullImgPath = os.path.join(Config().videoPath, "FULL" + timestamp + ".jpg")
             im = np.frombuffer(result[6], np.uint8).reshape(self.height, self.width, 3)
-            # fullImage = Image.fromarray(im)
-            # fullImage.save(fullImgPath)
-            imgPath = os.path.join(Config().videoPath, timestamp + ".jpg")
+            imgPath = os.path.join(Config().videoPath, self.gameDirName, timestamp + ".jpg")
             croppedFace = self.cropFace(im, value[1])
             image = Image.fromarray(croppedFace)
             image.save(imgPath)
             os.system('python videoAnalyser.py {0} &'.format(imgPath))
-            # with open(timestamp + '.txt', 'w') as f:
-            #     f.write(str(value[1]))
         self.faceDetection.subscribe("VideoModule")
 
 
@@ -110,9 +106,13 @@ class VideoModule:
 
 
 if __name__ == "__main__":
-    logging.basicConfig(filename='videoModule.log',level=logging.DEBUG)
+    logging.basicConfig(filename='logs/videoModule.log',level=logging.DEBUG)
+    if len(sys.argv) != 2:
+        logging.debug('Incorrect number of arguments, required 1 with'\
+        'video game directory name')
+        sys.exit(5)
     logging.debug('Starting video module')
-    camera = VideoModule()
+    camera = VideoModule(str(sys.argv[1]))
     try:
         while True:
             time.sleep(1)

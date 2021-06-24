@@ -3,74 +3,75 @@ language: plp
 
 # ================================ start ======================================
 
-u: (e:FrontTactilTouched) ^sCall(Events.resetListenFlag()) ^sCall(Events.onNewGame()) Chcesz ze mną zagrać w grę Ultimatum? ^sCall(Events.setListenFlag())
-  u1:([tak chcę chce poproszę poprosze dobrze "tak chcę"]) ^sCall(Events.resetListenFlag()) Super! Teraz przypomnę ci zasady gry. $OnExplainRules=1
-  u1:(nie "nie dziękuję") ^sCall(Events.resetListenFlag()) Ojoj, trudno. Może innym razem.
-  u1: (e:Dialog/NoOneSpeak10) $OnStartGameRepeat=1
-  u1: (*) $OnStartGameRepeat=1
+u: (e:FrontTactilTouched) ^sCall(Events.resetListenFlag()) ^sCall(Events.onNewGame()) $start=1
 
-u: (e:OnStartGameRepeat) ^sCall(Events.resetListenFlag()) Tak czy nie? Czekam na decyzję. $FrontTactilTouched=1
+u: (e:start) ^sCall(Event.onReachingGamePoint("askIfWantsToPlay")) Chcesz ze mną zagrać w grę Ultimatum? ^sCall(Events.setListenFlag())
+  u1:([tak chcę chce poproszę poprosze dobrze "tak chcę"]) ^sCall(Events.resetListenFlag()) ^sCall(Event.onReachingGamePoint("agreedToPlay")) Super! Teraz przypomnę ci zasady gry. $OnExplainRules=1
+  u1:(nie "nie dziękuję") ^sCall(Events.resetListenFlag()) ^sCall(Event.onReachingGamePoint("declinedToPlay")) Ojoj, trudno. Może innym razem.
+  u1: (e:Dialog/NoOneSpeak10) ^sCall(Event.onReachingGamePoint("noOneSpoke")) $OnStartGameRepeat=1
+  u1: (*) ^sCall(Event.onReachingGamePoint("unrecognized")) $OnStartGameRepeat=1
+
+u: (e:OnStartGameRepeat) ^sCall(Events.resetListenFlag()) ^sCall(Event.onReachingGamePoint("onStartGameRepeat")) Tak czy nie? Czekam na decyzję. $start=1
 
 # ============================= tresc zasad ===================================
 
-u: (e:OnExplainRules) $OnStartRound1=1
-# Wspólnie mamy dziesięć złotych. Za każdym razem musimy te pieniądze podzielić między siebie na dwie części tak, żeby każdy dostał przynajmniej jedną złotówkę. Będziemy zamieniać się rolami. Najpierw ty będziesz proponować ile monet chcesz zachować dla siebie, a ja mogę tą propozycję przyjąć lub odrzucić. Jeśli zaakceptuję twój pomysł to na twoim koncie znajdzie się zaproponowana przez ciebie kwota, a na moim pozostałe pieniądze. Jeśli go odrzucę to oboje nie dostaniemy ani złotówki. Po zamianie ról ja zaproponuję ile złotych z nowej puli dziesięciu złotych chciałbym oddać tobie. Ty możesz tak samo zaakceptować to lub odrzucić. Będziemy mogli zagrać więcej niż jedną rundę jeśli będziesz chcieć. $OnStartRound1=1
+u: (e:OnExplainRules) Wspólnie mamy dziesięć złotych. Za każdym razem musimy te pieniądze podzielić między siebie na dwie części tak, żeby każdy dostał przynajmniej jedną złotówkę. Będziemy zamieniać się rolami. Najpierw ty będziesz proponować ile monet chcesz zachować dla siebie, a ja mogę tą propozycję przyjąć lub odrzucić. Jeśli zaakceptuję twój pomysł to na twoim koncie znajdzie się zaproponowana przez ciebie kwota, a na moim pozostałe pieniądze. Jeśli go odrzucę to oboje nie dostaniemy ani złotówki. Po zamianie ról ja zaproponuję ile złotych z nowej puli dziesięciu złotych chciałbym oddać tobie. Ty możesz tak samo zaakceptować to lub odrzucić. Będziemy mogli zagrać więcej niż jedną rundę jeśli będziesz chcieć. $OnStartRound1=1
 
 # ======================== R1: czlowiek propnonuje ==============================
 
-u: (e:OnStartRound1) Podaj swoją propozycję. ^sCall(Events.setListenFlag())
-   u1: (_[1 2 3 4 5 6 7 8 9]) ^sCall(Events.resetListenFlag()) Wybrałeś $1 $humanOffer=$1 Akceptuję, otrzymujesz $humanOffer $OnRobotOffers1=1
-   u1: (e:Dialog/NoOneSpeak10) $OnHumanOffersRepeat1=1
-   u1: (*) $OnHumanOffersRepeat1=1
+u: (e:OnStartRound1) ^sCall(Event.onReachingGamePoint("onStartRound1")) Zaczynamy rundę pierwszą. Podaj swoją propozycję. ^sCall(Events.setListenFlag())
+   u1: (_[1 2 3 4 5 6 7 8 9]) ^sCall(Events.resetListenFlag()) Wybrałeś $1 $humanOffer=$1 ^sCall(Event.onReachingGamePoint($humanOffer)) Akceptuję, otrzymujesz $humanOffer $OnStartRound2=1
+   u1: (e:Dialog/NoOneSpeak10) ^sCall(Event.onReachingGamePoint("noOneSpoke")) $OnRepeatRound1=1
+   u1: (*) ^sCall(Event.onReachingGamePoint("unrecognized")) $OnRepeatRound1=1
 
-u: (e:OnHumanOffersRepeat1) ^sCall(Events.resetListenFlag()) Przypominam, że musisz podać liczbę od 1 do 9. $OnStartRound1=1
+u: (e:OnRepeatRound1) ^sCall(Events.resetListenFlag()) ^sCall(Event.onReachingGamePoint("OnRepeatRound1")) Przypominam, że musisz podać liczbę od 1 do 9. $OnStartRound1=1
 
 
 # ======================== R1: robot proponuje ==================================
 
-u: (e:OnRobotOffers1) Ja proponuję ci 8 $OnAskIfHumanAccepts1=1
+u: (e:OnStartRound2) ^sCall(Event.onReachingGamePoint("onStartRound2")) Ja proponuję ci 8 $OnAskIfHumanAccepts1=1
 
 u: (e:OnAskIfHumanAccepts1) Akceptujesz? ^sCall(Events.setListenFlag())
-   u1: ([tak akceptuję akceptuje akceptuje poproszę poprosze pewnie]) ^sCall(Events.resetListenFlag()) Wspaniale! Otrzymujesz 8, a ja 2 ^sCall(Events.onHumanDecision("True")) $OnContinue=1
-   u1: ([nie "nie akceptuję" odrzucam spadaj nigdy]) ^sCall(Events.resetListenFlag()) W takim razie oboje nic nie otrzymujemy. ^sCall(Events.onHumanDecision("False")) $OnContinue=1
-   u1: (e:Dialog/NoOneSpeak10) $OnRobotOffersRepeat1=1
-   u1: (*) $OnRobotOffersRepeat1=1
+   u1: ([tak akceptuję akceptuje akceptuje poproszę poprosze pewnie]) ^sCall(Events.resetListenFlag()) ^sCall(Event.onReachingGamePoint("humanAccepted")) Wspaniale! Otrzymujesz 8, a ja 2 ^sCall(Events.onHumanDecision("True")) $OnContinue=1
+   u1: ([nie "nie akceptuję" odrzucam spadaj nigdy]) ^sCall(Events.resetListenFlag()) ^sCall(Event.onReachingGamePoint("humanRejected")) W takim razie oboje nic nie otrzymujemy. ^sCall(Events.onHumanDecision("False")) $OnContinue=1
+   u1: (e:Dialog/NoOneSpeak10) ^sCall(Event.onReachingGamePoint("noOneSpoke")) $OnRepeatRound2=1
+   u1: (*) ^sCall(Event.onReachingGamePoint("unrecognized")) $OnRepeatRound2=1
 
-u: (e:OnRobotOffersRepeat1) ^sCall(Events.resetListenFlag()) Nie zrozumiałem, musisz odpowiedzieć tak lub nie $OnAskIfHumanAccepts1=1
+u: (e:OnRepeatRound2) ^sCall(Events.resetListenFlag()) ^sCall(Event.onReachingGamePoint("OnRepeatRound2")) Nie zrozumiałem, musisz odpowiedzieć tak lub nie $OnAskIfHumanAccepts1=1
 
 
 # ============================ kolejna runda? ====================================
 
-u: (e:OnContinue) Chcesz zagać kolejną rundę? ^sCall(Events.setListenFlag())
-  u1: ([tak chcę poproszę poprosze może pewnie]) ^sCall(Events.resetListenFlag()) Dobrze, gramy dalej! $OnStartRound2=1
-  u1: ([nie "już tyle" "nie dziękuję"]) ^sCall(Events.resetListenFlag()) Ojoj. Ale ja bardzo lubię grać w Ultimatum. Proszę, zagrajmy ostatni raz, a potem będziesz mógł iść do domu! $OnStartRound2=1
-  u1: (e:Dialog/NoOneSpeak10) $OnContinueRepeat=1
-  u1: (*) $OnContinueRepeat=1
+u: (e:OnContinue) ^sCall(Event.onReachingGamePoint("askIfToContinue")) Chcesz zagać kolejną rundę? ^sCall(Events.setListenFlag())
+  u1: ([tak chcę poproszę poprosze może pewnie]) ^sCall(Events.resetListenFlag()) ^sCall(Event.onReachingGamePoint("agreeToContinue")) Dobrze, gramy dalej! $OnStartRound3=1
+  u1: ([nie "już tyle" "nie dziękuję"]) ^sCall(Events.resetListenFlag()) ^sCall(Event.onReachingGamePoint("disagreeToContinue")) Ojoj. Ale ja bardzo lubię grać w Ultimatum. Proszę, zagrajmy ostatni raz, a potem będziesz mógł iść do domu! $OnStartRound2=1
+  u1: (e:Dialog/NoOneSpeak10) ^sCall(Event.onReachingGamePoint("noOneSpoke")) $OnContinueRepeat=1
+  u1: (*) ^sCall(Event.onReachingGamePoint("unrecognized")) $OnContinueRepeat=1
 
-u: (e:OnContinueRepeat) ^sCall(Events.resetListenFlag()) Nie zrozumiałem, musisz odpowiedzieć tak lub nie. $OnContinue=1
+u: (e:OnContinueRepeat) ^sCall(Events.resetListenFlag()) ^sCall(Event.onReachingGamePoint("OnContinueRepeat")) Nie zrozumiałem, musisz odpowiedzieć tak lub nie. $OnContinue=1
 
 # ======================== R2: czlowiek propnonuje ==============================
 
-u: (e:OnStartRound2) Podaj swoją propozycję. ^sCall(Events.setListenFlag())
-   u1: (_[1 2 3 4 5 6 7 8 9]) ^sCall(Events.resetListenFlag()) Wybrałeś $1 $humanOffer=$1 Akceptuję, otrzymujesz $humanOffer $OnRobotOffers2=1
-   u1: (e:Dialog/NoOneSpeak10) $OnHumanOffersRepeat2=1
-   u1: (*) $OnHumanOffersRepeat2=1
+u: (e:OnStartRound3) ^sCall(Event.onReachingGamePoint("onStartRound3")) Podaj swoją propozycję. ^sCall(Events.setListenFlag())
+   u1: (_[1 2 3 4 5 6 7 8 9]) ^sCall(Events.resetListenFlag()) Wybrałeś $1 $humanOffer=$1 ^sCall(Event.onReachingGamePoint($humanOffer)) Akceptuję, otrzymujesz $humanOffer $onStartRound4=1
+   u1: (e:Dialog/NoOneSpeak10) ^sCall(Event.onReachingGamePoint("noOneSpoke")) $OnRepeatRound3=1
+   u1: (*) ^sCall(Event.onReachingGamePoint("unrecognized")) $OnRepeatRound3=1
 
-u: (e:OnHumanOffersRepeat2) ^sCall(Events.resetListenFlag()) Przypominam, że musisz podać liczbę od 1 do 9. $OnStartRound2=1
+u: (e:OnRepeatRound3) ^sCall(Events.resetListenFlag()) ^sCall(Event.onReachingGamePoint("onRepeatRound3")) Przypominam, że musisz podać liczbę od 1 do 9. $OnStartRound3=1
 
 
 # ======================== R2: robot proponuje ==================================
 
-u: (e:OnRobotOffers2) Ja proponuję ci 6 $OnAskIfHumanAccepts2=1
+u: (e:onStartRound4) ^sCall(Event.onReachingGamePoint("onStartRound4")) Ja proponuję ci 4 $OnAskIfHumanAccepts2=1
 
 u: (e:OnAskIfHumanAccepts2) Akceptujesz? ^sCall(Events.setListenFlag())
-   u1: ([tak akceptuję akceptuje akceptuje poproszę poprosze pewnie]) ^sCall(Events.resetListenFlag()) Wspaniale! Otrzymujesz 6, a ja 4 ^sCall(Events.onHumanDecision("True")) $OnEnd=1
-   u1: ([nie "nie akceptuję" odrzucam spadaj nigdy]) ^sCall(Events.resetListenFlag()) W takim razie oboje nic nie otrzymujemy. ^sCall(Events.onHumanDecision("False")) $OnEnd=1
-   u1: (e:Dialog/NoOneSpeak10) $OnRobotOffersRepeat2=1
-   u1: (*) $OnRobotOffersRepeat2=1
+   u1: ([tak akceptuję akceptuje akceptuje poproszę poprosze pewnie]) ^sCall(Events.resetListenFlag()) ^sCall(Event.onReachingGamePoint("humanAccepted"))Wspaniale! Otrzymujesz 6, a ja 4 ^sCall(Events.onHumanDecision("True")) $OnEnd=1
+   u1: ([nie "nie akceptuję" odrzucam spadaj nigdy]) ^sCall(Events.resetListenFlag()) ^sCall(Event.onReachingGamePoint("humanRejected")) W takim razie oboje nic nie otrzymujemy. ^sCall(Events.onHumanDecision("False")) $OnEnd=1
+   u1: (e:Dialog/NoOneSpeak10) ^sCall(Event.onReachingGamePoint("noOneSpoke")) $OnRobotOffersRepeat2=1
+   u1: (*) ^sCall(Event.onReachingGamePoint("unrecognized")) $OnRobotOffersRepeat2=1
 
-u: (e:OnRobotOffersRepeat2) ^sCall(Events.resetListenFlag()) Nie zrozumiałem, musisz odpowiedzieć tak lub nie. $OnAskIfHumanAccepts2=1
+u: (e:OnRobotOffersRepeat2) ^sCall(Events.resetListenFlag()) ^sCall(Event.onReachingGamePoint("onRepeatRound4")) Nie zrozumiałem, musisz odpowiedzieć tak lub nie. $OnAskIfHumanAccepts2=1
 
 # ============================== koniec =========================================
 
-u: (e:OnEnd) To już koniec. Dziękuję ci za świetną zabawę! ^sCall(Events.onGameFinished())
+u: (e:OnEnd) ^sCall(Event.onReachingGamePoint("gameEnd")) To już koniec. Dziękuję ci za świetną zabawę! ^sCall(Events.onGameFinished())

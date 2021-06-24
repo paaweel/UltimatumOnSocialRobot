@@ -2,13 +2,15 @@ topic: ~triggerGame()
 language: plp
 
 # ================================ start ======================================
-u: (e:FrontTactilTouched) ^sCall(Events.resetListenFlag()) ^sCall(Events.onNewGame()) Chcesz ze mną zagrać w grę Ultimatum? ^sCall(Events.setListenFlag())
-  u1:([tak chcę chce poproszę poprosze "tak chcę"]) ^sCall(Events.resetListenFlag()) Super! $OnAskAboutRules=1
-  u1:(nie) ^sCall(Events.resetListenFlag()) Ojoj, trudno. Może innym razem.
+u: (e:FrontTactilTouched) ^sCall(Events.resetListenFlag()) ^sCall(Events.onNewGame()) $start=1
+
+u: (e:start) Chcesz ze mną zagrać w grę Ultimatum? ^sCall(Events.setListenFlag())
+  u1:([tak chcę chce poproszę poprosze dobrze "tak chcę"]) ^sCall(Events.resetListenFlag()) Super! Teraz przypomnę ci zasady gry. $OnExplainRules=1
+  u1:(nie "nie dziękuję") ^sCall(Events.resetListenFlag()) Ojoj, trudno. Może innym razem.
   u1: (e:Dialog/NoOneSpeak10) $OnStartGameRepeat=1
   u1: (*) $OnStartGameRepeat=1
 
-u: (e:OnStartGameRepeat) ^sCall(Events.resetListenFlag()) Tak czy nie? Czekam na decyzję. $FrontTactilTouched=1
+u: (e:OnStartGameRepeat) ^sCall(Events.resetListenFlag()) Tak czy nie? Czekam na decyzję. $start=1
 
 
 # ===================== pytanie o znajomosc zasad =============================

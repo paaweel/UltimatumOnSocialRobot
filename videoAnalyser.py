@@ -22,9 +22,9 @@ class VideoAnalyser:
         # logging.debug('Opening PUSH ZMQ communication on '
         #     + zmqSocket
         #     + ' for video emotion labels')
-        self.context = zmq.Context()
-        self.videoEmotionsSocket = self.context.socket(zmq.PUSH)
-        self.videoEmotionsSocket.bind(zmqSocket)
+        # self.context = zmq.Context()
+        # self.videoEmotionsSocket = self.context.socket(zmq.PUSH)
+        # self.videoEmotionsSocket.bind(zmqSocket)
 
         AI_MODELS_DIR = os.path.join(os.getcwd(), 'AI_models/video')
         # takes ~0.52s
@@ -32,9 +32,6 @@ class VideoAnalyser:
             txt_model = json_file.read()
             self.model = model_from_json(txt_model)
             self.model.load_weights(os.path.join(AI_MODELS_DIR, 'best.hdf5'))
-        self.currentGameVideoCsv = sorted(glob.glob(\
-        Config().classifierOutputVideoPath + '/*'),\
-        key = os.path.getmtime)[-1]
 
 
     def analyse(self, path):
@@ -45,7 +42,10 @@ class VideoAnalyser:
         predictedEmotion = np.argmax(predictions)
         # self.videoEmotionsSocket.send(predictions)
         logging.debug('VIDEO {0}: {1} -> {2}'.format(path, predictedEmotion, predictions))
-        with open(self.currentGameVideoCsv, 'a') as csvfile:
+        currentGameVideoCsv = sorted(glob.glob(\
+        Config().classifierOutputVideoPath + '/*'),\
+        key = os.path.getmtime)[-1]
+        with open(currentGameVideoCsv, 'a') as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=Config().videoHeader)
             writer.writerow({\
             'filename': os.path.basename(path), \
@@ -60,7 +60,7 @@ class VideoAnalyser:
 
 if __name__ == "__main__":
     # db = DbConnector()
-    logging.basicConfig(filename='videoModule.log',level=logging.DEBUG)
+    logging.basicConfig(filename='logs/videoModule.log',level=logging.DEBUG)
     if len(sys.argv) != 2:
         logging.debug('Incorrect number of arguments, required 1 with'\
         'audio file path')

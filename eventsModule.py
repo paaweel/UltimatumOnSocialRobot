@@ -7,6 +7,7 @@ import sys
 import time
 import random
 import qi
+import logging
 
 from naoqi import ALProxy
 from naoqi import ALBroker
@@ -21,6 +22,7 @@ import csv
 from datetime import datetime
 import subprocess
 import signal
+import os
 
 
 # Global variable to store the HumanGreeter module instance
@@ -46,31 +48,45 @@ class EventsModule(ALModule):
         memory = ALProxy("ALMemory")
         self.ultimatumGame = UltimatumGame()
         self.soundDetector = SoundDetector(session)
-        self.currentGameAudioCsv = ""
-        self.currentGameVideoCsv = ""
+        self.currentGameTimestamp = ""
         self.videoProcess = None
 
     def onNewGame(self):
-        timestamp = datetime.now().strftime("%Y-%b-%d_%H:%M:%S")
-        self.currentGameAudioCsv = '{2}/v-{0}-{1}.csv'.format(Config().version.split('.')[0], timestamp, Config().classifierOutputAudioPath)
-        with open(self.currentGameAudioCsv, 'w') as csvfile:
+        self.currentGameTimestamp = datetime.now().strftime("%Y-%b-%d_%H:%M:%S")
+        currentGameAudioCsv = '{2}/v-{0}-{1}.csv'.format(Config().version.split('.')[0], self.currentGameTimestamp, Config().classifierOutputAudioPath)
+        with open(currentGameAudioCsv, 'w') as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=Config().audioHeader)
             writer.writeheader()
 
-        self.currentGameVideoCsv = '{2}/v-{0}-{1}.csv'.format(Config().version.split('.')[0], timestamp, Config().classifierOutputVideoPath)
-        with open(self.currentGameVideoCsv, 'w') as csvfile:
+        currentGameVideoCsv = '{2}/v-{0}-{1}.csv'.format(Config().version.split('.')[0], self.currentGameTimestamp, Config().classifierOutputVideoPath)
+        with open(currentGameVideoCsv, 'w') as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=Config().videoHeader)
             writer.writeheader()
 
-        poll = self.videoProcess.poll()
-        if poll is None:
-            # subprocess is alive
-            print("subprocess was alive")
-            self.videoProcess.send_signal(signal.SIGINT)
-        self.videoProces = subprocess.Popen(["python", "videoModule.py"])
+        poll = None
+        try:
+            poll = self.videoProcess.poll()
+            if poll is None:
+                # subprocess is alive
+                print("video capture process was alive, sending ctr+c")
+                self.videoProcess.send_signal(signal.SIGINT)
+        finally:
+            print("new game, starting video capture")
+            makeGameVideoDir = '{0}/{1}'.format(Config().videoPath, self.currentGameTimestamp)
+            if not os.path.exists(makeGameVideoDir):
+                os.mkdir(makeGameVideoDir)
+            makeGameAudioDir = '{0}/{1}'.format(Config().audioPath, self.currentGameTimestamp)
+            if not os.path.exists(makeGameAudioDir):
+                os.mkdir(makeGameAudioDir)
+            self.videoProces = subprocess.Popen(["python", "videoModule.py", self.currentGameTimestamp])
 
     def onGameFinished():
+        print("game finished, sending ctr+c to video capture process")
         self.videoProcess.send_signal(signal.SIGINT)
+
+    def onReachingGamePoint(pointName):
+        timestamp = datetime.now().strftime("%Y-%b-%d_%H:%M:%S")
+        logging.debug('game_timestamp = [{0}]; on [{1}] - reached game point: {2}'.format(self.currentGameTimestamp, timestamp, pointName))
 
     def setListenFlag(self):
         self.soundDetector.waitForSound = True
@@ -78,7 +94,7 @@ class EventsModule(ALModule):
     def resetListenFlag(self):
         if self.soundDetector.waitForSound:
             self.soundDetector.waitForSound = False
-            self.soundDetector.stopListening()
+            self.soundDetector.stopListening(self.currentGameTimestamp)
 
     def onHumanOffers(self, offer):
         print("Human offer value: ", offer)
@@ -161,4 +177,5 @@ def runEventListener():
 
 
 if __name__ == "__main__":
+    logging.basicConfig(filename='logs/eventsModule.log',level=logging.DEBUG)
     runEventListener()

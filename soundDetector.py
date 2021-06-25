@@ -40,7 +40,7 @@ class SoundDetector():
             self.soundDetectionService.subscribe("SoundDetector")
             timestamp = datetime.now().strftime("%Y-%b-%d_%H:%M:%S,%f")
             oldName = '{0}/{1}'.format(Config().audioPath, os.path.basename(self.recPath))
-            newName = '{0}/{1}'.format(Config().audioPath, currentGameTimestamp, timestamp + ".wav")
+            newName = '{0}/{1}/{2}'.format(Config().audioPath, currentGameTimestamp, timestamp + ".wav")
             command = 'scp nao@{0}:{1} {2} && mv {3} {4} && python audioModule.py {4} &'\
             .format(Config().ip, self.recPath, Config().audioPath, oldName, newName)
             os.system(command)

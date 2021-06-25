@@ -8,6 +8,8 @@ import time
 import random
 import qi
 import logging
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 from naoqi import ALProxy
 from naoqi import ALBroker
@@ -80,11 +82,11 @@ class EventsModule(ALModule):
                 os.mkdir(makeGameAudioDir)
             self.videoProces = subprocess.Popen(["python", "videoModule.py", self.currentGameTimestamp])
 
-    def onGameFinished():
+    def onGameFinished(self):
         print("game finished, sending ctr+c to video capture process")
         self.videoProcess.send_signal(signal.SIGINT)
 
-    def onReachingGamePoint(pointName):
+    def onReachingGamePoint(self, pointName):
         timestamp = datetime.now().strftime("%Y-%b-%d_%H:%M:%S")
         logging.debug('game_timestamp = [{0}]; on [{1}] - reached game point: {2}'.format(self.currentGameTimestamp, timestamp, pointName))
 
@@ -164,6 +166,7 @@ def runEventListener():
     # variable
     global Events
     Events = EventsModule("Events", session)
+    logging.basicConfig(filename='logs/eventsModule.log',level=logging.DEBUG)
 
     try:
         # raw_input()
@@ -177,5 +180,4 @@ def runEventListener():
 
 
 if __name__ == "__main__":
-    logging.basicConfig(filename='logs/eventsModule.log',level=logging.DEBUG)
     runEventListener()

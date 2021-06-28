@@ -1,16 +1,19 @@
 import os
 
-GENERAL = 'ultimatumGeneral.top'
-EMPHATIC = 'ultimatumEmpathic.top'
-EGOISTIC = 'ultimatumEgoistic.top'
 
+class GameVersions: 
+    def __init__(self):
+        self.topicPrefix = "topic/"
+        self.general = self.topicPrefix + 'ultimatumGeneral.top'
+        self.emphatic = self.topicPrefix + 'ultimatumEmpathic.top'
+        self.egoistic = self.topicPrefix + 'ultimatumEgoistic.top'
 
 class Config:
     def __init__(self):
         self.ip = '192.168.1.123'
         self.language = 'Polish'
         self.port = '9559'
-        self.version = EMPHATIC
+        self.version = GameVersions().emphatic
         self.audioPath = './logs/audio_files'
         self.videoPath = './logs/video_files'
         self.classifierOutputAudioPath = './logs/classifiers_output/audio'

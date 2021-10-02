@@ -4,7 +4,6 @@ import os.path
 import pandas as pd
 from pandas import DataFrame
 
-
 class DbConnector:
     def __init__(self):
         self.dbName = 'ultiatumGame.db'

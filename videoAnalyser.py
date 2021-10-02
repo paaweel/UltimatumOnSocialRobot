@@ -19,6 +19,7 @@ class VideoAnalyser:
     def __init__(self, videoPath):
         self.videoPath = videoPath
         zmqSocket = "tcp://127.0.0.1:5559"
+        
         # logging.debug('Opening PUSH ZMQ communication on '
         #     + zmqSocket
         #     + ' for video emotion labels')
@@ -61,9 +62,11 @@ class VideoAnalyser:
 if __name__ == "__main__":
     # db = DbConnector()
     logging.basicConfig(filename='logs/videoModule.log',level=logging.DEBUG)
+    
     if len(sys.argv) != 2:
         logging.debug('Incorrect number of arguments, required 1 with'\
         'audio file path')
         sys.exit(5)
+
     videoClassifier = VideoAnalyser(str(sys.argv[1]))
     videoClassifier.analyse(videoClassifier.videoPath)

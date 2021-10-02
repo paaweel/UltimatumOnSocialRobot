@@ -30,6 +30,7 @@ class VideoModule:
                   + ip + "\" on port " + port + ".\n"
                   + "Please check your script arguments. "
                   + "Run with -h option for help.")
+                  
         # logging.debug('Subscribing to a video service')
         self.gameDirName = gameDirName
         self.resolution = 2

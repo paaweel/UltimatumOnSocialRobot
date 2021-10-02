@@ -20,7 +20,6 @@ def main(session, topic_path):
 
     ALDialog = session.service("ALDialog")
     ALDialog.setLanguage(Config().language)
-    # self.proxy = ALProxy("ALProxy")
     ALDialog.setASRConfidenceThreshold(0.2)
 
     with open(topic_path, 'r') as f:
@@ -41,8 +40,7 @@ def main(session, topic_path):
         # Deactivate the topic
         ALDialog.deactivateTopic(topic_name)
 
-        # now that the dialog engine is stopped and there are no more activated topics,
-        # we can unload the topics and free the associated memory
+        # Unload the topics and free the associated memory
         ALDialog.unloadTopic(topic_name)
         sys.exit(0)
 

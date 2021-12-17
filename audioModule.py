@@ -2,19 +2,19 @@ import random
 import numpy as np
 import librosa
 import array
-import zmq
 import time
 from datetime import datetime
 import logging
 import zmq
 # from dbConnector import DbConnector
 import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 from tensorflow.keras.models import model_from_json
 import sys
 import csv
 from config import Config
 import glob
+
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 
 class AudioModule:

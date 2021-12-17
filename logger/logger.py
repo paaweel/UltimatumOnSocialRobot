@@ -2,6 +2,14 @@ from logger_config import LoggerConfig
 import logging
 
 
+class Logger():
+    def __init__(self) -> None:
+        pass
+
+    def save_to(self, path):
+        pass
+
+
 def log_sound(function):
 
     def sound_function_wrapper():
@@ -12,6 +20,8 @@ def log_sound(function):
 
     return sound_function_wrapper
 
+
+def log(level, function)
 
 if __name__ == "__main__":
     

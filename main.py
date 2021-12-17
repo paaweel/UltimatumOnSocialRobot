@@ -18,14 +18,18 @@ def stop(topicThread, eventThread):
     eventThread.join()
 
 if __name__ == '__main__':
+    
     topicThread = Thread(target=load_topic)
     eventThread = Thread(target=runEventListener)
     start(topicThread, eventThread)
+
     try:
         raw_input()
         print "Shutting down"
+    
     except KeyboardInterrupt:
         print "Shutting down"
+
     topicThread.join()
     eventThread.join()
     sys.exit(0)

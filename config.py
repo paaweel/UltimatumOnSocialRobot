@@ -1,16 +1,19 @@
 import os
 
-
 class GameVersions: 
     def __init__(self):
         self.topicPrefix = "topic/"
-        self.general = self.topicPrefix + 'ultimatumGeneral.top'
-        self.emphatic = self.topicPrefix + 'ultimatumEmpathic.top'
-        self.egoistic = self.topicPrefix + 'ultimatumEgoistic.top'
+        self.generalTopic = 'ultimatumGeneral.top'
+        self.emphaticTopic = 'ultimatumEmpathic.top'
+        self.egoisticTopic = 'ultimatumEgoistic.top'
+
+        self.general = self.topicPrefix + self.generalTopic
+        self.emphatic = self.topicPrefix + self.emphaticTopic
+        self.egoistic = self.topicPrefix + self.egoisticTopic
 
 class Config:
     def __init__(self):
-        self.ip = '192.168.1.123'
+        self.ip = '192.168.1.6'
         self.language = 'Polish'
         self.port = '9559'
         self.version = GameVersions().emphatic
@@ -22,7 +25,10 @@ class Config:
         self.videoLabels = ['AN', 'FE', 'HA', 'SA', 'SU']
         self.audioHeader = ['filename', 'max_emotion', 'emotion_label', 'AN', 'DI', 'FE', 'HA', 'NE', 'SA']
         self.videoHeader = ['filename', 'max_emotion', 'emotion_label', 'AN', 'FE', 'HA', 'SA', 'SU']
+        
+        self.create_dirs()
 
+    def create_dirs(self):
         if not os.path.exists('./logs'):
             os.mkdir('./logs')
         if not os.path.exists(self.audioPath):

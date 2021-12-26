@@ -1,5 +1,7 @@
 from config import Config
 import qi
+import logging
+
 
 class SessionHelper:
     def __init__(self):
@@ -7,11 +9,19 @@ class SessionHelper:
 
     @staticmethod
     def get_active_session():
-        session = qi.Session()
-        session.connect("tcp://" + Config().ip)
 
-        return session
+        try:
+            session = qi.Session()
+            session.connect("tcp://" + Config().ip)
+
+            return session
+        except:
+            logging.error("Unable to create seesion object")
+        finally:
+            return None
+
 
 if __name__ == "__main__":
     session = SessionHelper.get_active_session()
-    print("")
+    if session is not None:
+        logging.info("Session sucessfuly established")

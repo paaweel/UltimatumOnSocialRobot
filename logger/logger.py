@@ -2,7 +2,7 @@ from logger_config import LoggerConfig
 import logging
 
 
-class Logger():
+class Logger:
     def __init__(self) -> None:
         pass
 
@@ -11,20 +11,17 @@ class Logger():
 
 
 def log_sound(function):
-
     def sound_function_wrapper():
         output = function()
 
-        print ("output")
+        print("output")
         return output
 
     return sound_function_wrapper
 
 
-def log(level, function)
-
 if __name__ == "__main__":
-    
+
     @log_sound
     def f():
         print("st")

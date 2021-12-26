@@ -1,5 +1,4 @@
-
-class LoggerConfig():
+class LoggerConfig:
     def __init__(self):
         self.path_prefix = "./logs/"
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 import qi
 import sys
@@ -13,6 +13,7 @@ def load_topic():
     session.connect("tcp://{}:{}".format(ip, port))
     main(session, Config().version)
 
+
 def main(session, topic_path):
     """
     Load and run specified topic on the robot
@@ -22,7 +23,7 @@ def main(session, topic_path):
     ALDialog.setLanguage(Config().language)
     ALDialog.setASRConfidenceThreshold(0.2)
 
-    with open(topic_path, 'r') as f:
+    with open(topic_path, "r") as f:
         topic_content = f.read()
 
     if topic_content == "":
@@ -32,11 +33,11 @@ def main(session, topic_path):
     try:
         topic_name = ALDialog.loadTopicContent(topic_content)
         ALDialog.activateTopic(topic_name)
-        ALDialog.subscribe('game_dialog')
+        ALDialog.subscribe("game_dialog")
 
         raw_input("\nTopic loaded, press enter to exit...")
     finally:
-        ALDialog.unsubscribe('game_dialog')
+        ALDialog.unsubscribe("game_dialog")
         # Deactivate the topic
         ALDialog.deactivateTopic(topic_name)
 

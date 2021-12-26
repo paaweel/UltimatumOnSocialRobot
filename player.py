@@ -1,8 +1,8 @@
 import random
 
 
-class IPlayer():
-    """ Interface for the players """
+class IPlayer:
+    """Interface for the players"""
 
     def propose(self, total):
         # how much money I want for myself
@@ -13,8 +13,8 @@ class IPlayer():
         pass
 
 
-class RandomPlayer:
-    """ Random UG player
+class RandomPlayer(IPlayer):
+    """Random UG player
     offers:
         random
     accepts:
@@ -22,14 +22,14 @@ class RandomPlayer:
     """
 
     def propose(self, total):
-        return random.randrange(1, total-1)
+        return random.randrange(1, total - 1)
 
     def respond(self, fraction):
         return bool(random.getrandbits(1))
 
 
-class WeightedPlayer:
-    """ Same as random, but the probability of acceptance
+class WeightedPlayer(IPlayer):
+    """Same as random, but the probability of acceptance
      is adjusted for the fraction being proposed
     offers:
         random
@@ -38,7 +38,7 @@ class WeightedPlayer:
     """
 
     def propose(self, total):
-        return random.randrange(1, total-1)
+        return random.randrange(1, total - 1)
 
     def respond(self, fraction):
         return random.uniform(0, 1) <= fraction

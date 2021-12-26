@@ -16,18 +16,22 @@ sentences.append("""To wspaniale, wytłumaczyć Ci zasady gry?""")
 
 # tak
 
-sentences.append("""Wspólnie mamy dziesięć złotych. 
+sentences.append(
+    """Wspólnie mamy dziesięć złotych. 
 Za każdym razem musimy te pieniądze podzielić między siebie na dwie części tak, 
 żeby każdy dostał przynajmniej jedną złotówkę. Będziemy zamieniać się rolami. 
 Najpierw ja zaproponuję ile monet chcę zachować dla siebie, a Ty możesz tę propozycję przyjąć lub odrzucić. 
 Jeśli zaakceptujesz mój pomysł to na twoim koncie znajdzie się zaproponowana przeze mnie kwota, a na Twoim pozostałe pieniądze. 
 Jeśli go odrzucisz to oboje nie dostaniemy ani złotówki. 
 Po zamianie ról Ty zaproponujesz ile złotych z nowej puli dziesięciu złotych chciałbyś zostawić dla siebie. 
-Ja mogę tak samo zaakceptować lub odrzucić. Rozumiesz?""")
+Ja mogę tak samo zaakceptować lub odrzucić. Rozumiesz?"""
+)
 
 # tak
 
-sentences.append("""okej, to ja zacznę! Proponuję 7 ziko dla Ciebie i 3 dla mnie, akceptujesz?""")
+sentences.append(
+    """okej, to ja zacznę! Proponuję 7 ziko dla Ciebie i 3 dla mnie, akceptujesz?"""
+)
 
 # tak
 
@@ -35,9 +39,11 @@ sentences.append("""definitywnie?""")
 
 # definitywnie
 
-sentences.append("""Super, oboje otrzymujemy ustaloną kwotę. Teraz Twoja kolej, jaki podział proponujesz?""")
+sentences.append(
+    """Super, oboje otrzymujemy ustaloną kwotę. Teraz Twoja kolej, jaki podział proponujesz?"""
+)
 
-# 6 dla Ciebie 4 dla mnie 
+# 6 dla Ciebie 4 dla mnie
 
 sentences.append("""Pasuje mi taki podział, akceptuję""")
 sentences.append("""Oboje dostajemy pieniądze""")
@@ -48,8 +54,8 @@ sentences.append("""Dziękuję Ci za grę""")
 
 
 def main():
-    """ 
-        Main entry point
+    """
+    Main entry point
     """
 
     session = qi.Session()
@@ -64,7 +70,6 @@ def main():
         print("Can't connect to Nao at ip: " + Config().ip)
     except KeyboardInterrupt:
         print("Interruption received, shutting down")
-
 
 
 if __name__ == "__main__":

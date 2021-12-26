@@ -17,7 +17,7 @@ timestamp = datetime.now().strftime("%Y-%b-%d_%H:%M:%S")
 # makeGameVideoDirCommand = 'mkdir {0}/{1}'.format(Config().videoPath, timestamp)
 # print(makeGameVideoDirCommand)
 
-makeGameVideoDir = '{0}/{1}'.format(Config().videoPath, timestamp)
+makeGameVideoDir = "{0}/{1}".format(Config().videoPath, timestamp)
 if not os.path.exists(makeGameVideoDir):
     print(makeGameVideoDir)
     os.mkdir(makeGameVideoDir)

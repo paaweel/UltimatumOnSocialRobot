@@ -4,7 +4,6 @@
 from threading import Thread
 from dialogTopic import load_topic
 from eventsModule import runEventListener
-import time
 import sys
 
 

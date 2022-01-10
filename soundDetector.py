@@ -2,7 +2,6 @@ import qi
 from naoqi import ALProxy
 import argparse
 import sys
-import time
 import os
 from datetime import datetime
 from config import Config

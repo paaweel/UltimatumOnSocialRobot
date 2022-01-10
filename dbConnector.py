@@ -2,7 +2,6 @@ import sqlite3
 import logging
 import os.path
 import pandas as pd
-from pandas import DataFrame
 
 
 class DbConnector:
@@ -24,13 +23,13 @@ class DbConnector:
             self.connector.commit()
             logging.debug("Commiting changes to the database")
 
-    def importCsv2Db(csvPath, tableName, ifExists="append"):
+    def importCsv2Db(self, csvPath, tableName, ifExists="append"):
         logging.debug("Reading data from csv " + csvPath)
         readTableData = pd.read_csv(csvPath)
         readTableData.to_sql(tableName, self.connector, if_exists="append", index=False)
         logging.debug("Updated data with csv in table " + tableName)
 
-    def exportDb2Csv(csvPath, tableName):
+    def exportDb2Csv(self, csvPath, tableName):
         logging.debug("Reading data from table " + tableName)
         df = pd.read_sql_query("SELECT * FROM " + tableName, self.connector)
         df.to_csv(csvPath, index=False)

@@ -1,5 +1,4 @@
 import qi
-import argparse
 import sys
 from config import Config
 

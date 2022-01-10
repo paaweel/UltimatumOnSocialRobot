@@ -1,7 +1,3 @@
-import subprocess
-import sys
-import time
-import signal
 from config import Config
 from datetime import datetime
 import os

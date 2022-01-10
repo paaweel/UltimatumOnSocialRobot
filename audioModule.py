@@ -1,11 +1,7 @@
-import random
 import numpy as np
 import librosa
-import array
-import time
 from datetime import datetime
 import logging
-import zmq
 
 # from dbConnector import DbConnector
 import os
@@ -21,13 +17,6 @@ os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 class AudioModule:
     def __init__(self, audioPath):
         self.audioPath = audioPath
-        zmqSocket = "tcp://127.0.0.1:5558"
-        # logging.debug('Opening PUSH ZMQ communication on '
-        #     + zmqSocket
-        #     + ' for audio emotion labels')
-        # self.context = zmq.Context()
-        # self.audioEmotionsSocket = self.context.socket(zmq.PUSH)
-        # self.audioEmotionsSocket.bind(zmqSocket)
 
         AI_MODELS_DIR = os.path.join(os.getcwd(), "AI_models/audio")
         # think about changing to one-time loading, takes ~ 0.15s

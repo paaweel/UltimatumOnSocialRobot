@@ -2,9 +2,6 @@
 # -*- coding: utf-8 -*-
 
 from player import RandomPlayer, WeightedPlayer, EmotionalPlayer
-import time
-import string
-from datetime import datetime, timedelta
 
 
 def get_player(player_type, ui_processor=None):
@@ -17,20 +14,20 @@ def get_player(player_type, ui_processor=None):
 
 class UltimatumGame:
     """
-    Class for playing ultimatum game with mocked Pepper.
+        Class for playing ultimatum game with mocked Pepper.
 
-    ...
+        ...
+    F
+        Attributes
+        ----------
+        player : Player
+            Pepper robot mocked on the PC
 
-    Attributes
-    ----------
-    player : Player
-        Pepper robot mocked on the PC
 
-
-    Methods
-    -------
-    run()
-        Launches ultimatum game.
+        Methods
+        -------
+        run()
+            Launches ultimatum game.
     """
 
     def __init__(self, player_type="random"):

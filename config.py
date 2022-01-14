@@ -3,7 +3,7 @@ import os
 
 class GameVersions:
     def __init__(self):
-        self.topicPrefix = "topic/"
+        self.topicPrefix = "topics/"
         self.generalTopic = "ultimatumGeneral.top"
         self.emphaticTopic = "ultimatumEmpathic.top"
         self.egoisticTopic = "ultimatumEgoistic.top"
@@ -12,11 +12,17 @@ class GameVersions:
         self.emphatic = self.topicPrefix + self.emphaticTopic
         self.egoistic = self.topicPrefix + self.egoisticTopic
 
+class NaoServices:
+    def __init__(self):
+        self.tts = "ALTextToSpeech"
+
 
 class Config:
     def __init__(self):
-        self.ip = "192.168.1.8"  # TODO: verify if nao.local would work
+        self.ip = "nao.local"
+        self.fullIp = "tcp://" + self.ip
         self.language = "Polish"
+        self.services = NaoServices()
         self.port = "9559"
         self.version = GameVersions().emphatic
         self.audioPath = "./logs/audio_files"

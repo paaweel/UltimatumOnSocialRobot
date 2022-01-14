@@ -9,16 +9,14 @@ class SessionHelper:
 
     @staticmethod
     def get_active_session():
-
+        session = None
         try:
             session = qi.Session()
-            session.connect("tcp://" + Config().ip)
-
-            return session
+            session.connect(Config().fullIp)
         except:
-            logging.error("Unable to create seesion object")
+            logging.error(f"Unable to create session object at ip:{Config().fullIp}")
         finally:
-            return None
+            return session
 
 
 if __name__ == "__main__":

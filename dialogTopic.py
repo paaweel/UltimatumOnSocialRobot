@@ -6,45 +6,35 @@ import sys
 from config import Config
 
 
-def load_topic():
-    session = qi.Session()
-    ip = Config().ip
-    port = Config().port
-    session.connect("tcp://{}:{}".format(ip, port))
-    main(session, Config().version)
+class TopicLoader:
+    def __init__(self, session) -> None:
+        self.session = session
+        self.gameVersion = Config().version
+        self.ALDialog = session.service("ALDialog")
+        self.topic_name = ""
+        self.load_topic()
 
+    def load_topic(self):
+        
+        self.ALDialog.setLanguage(Config().language)
+        self.ALDialog.setASRConfidenceThreshold(0.2)
 
-def main(session, topic_path):
-    """
-    Load and run specified topic on the robot
-    """
+        with open(self.gameVersion, "r") as f:
+            topic_content = f.read()
 
-    ALDialog = session.service("ALDialog")
-    ALDialog.setLanguage(Config().language)
-    ALDialog.setASRConfidenceThreshold(0.2)
+        if topic_content == "":
+            print("Topic file is empty! Closing...")
 
-    with open(topic_path, "r") as f:
-        topic_content = f.read()
+        self.topic_name = self.ALDialog.loadTopicContent(topic_content)
+        print(self.topic_name)
+        self.ALDialog.activateTopic(self.topic_name)
+        self.ALDialog.subscribe("game_dialog")
 
-    if topic_content == "":
-        print("Topic file is empty! Closing...")
-        sys.exit(1)
-
-    try:
-        topic_name = ALDialog.loadTopicContent(topic_content)
-        ALDialog.activateTopic(topic_name)
-        ALDialog.subscribe("game_dialog")
-
-        raw_input("\nTopic loaded, press enter to exit...")
-    finally:
-        ALDialog.unsubscribe("game_dialog")
+    def __del__(self):
+        print("disconnecting aldialog")
         # Deactivate the topic
-        ALDialog.deactivateTopic(topic_name)
-
+        self.topic_name = "ultimatumEmpathic"
+        self.ALDialog.deactivateTopic(self.topic_name)
         # Unload the topics and free the associated memory
-        ALDialog.unloadTopic(topic_name)
-        sys.exit(0)
-
-
-if __name__ == "__main__":
-    load_topic()
+        self.ALDialog.unloadTopic(self.topic_name)
+        self.ALDialog.unsubscribe("game_dialog")

@@ -4,8 +4,6 @@
 """
 
 import sys
-import time
-import random
 import qi
 import logging
 import os

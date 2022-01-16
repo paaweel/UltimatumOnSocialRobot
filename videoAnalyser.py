@@ -6,7 +6,7 @@ import sys
 from tensorflow.keras.models import model_from_json
 from PIL import Image
 import numpy as np
-from config import Config
+from config.config import Config
 import glob
 import csv
 
@@ -38,7 +38,7 @@ class VideoAnalyser:
             "VIDEO {0}: {1} -> {2}".format(path, predictedEmotion, predictions)
         )
         currentGameVideoCsv = sorted(
-            glob.glob(Config().classifierOutputVideoPath + "/*"), key=os.path.getmtime
+            glob.glob(Config().emotionVideoClassifierLogs + "/*"), key=os.path.getmtime
         )[-1]
         with open(currentGameVideoCsv, "a") as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=Config().videoHeader)

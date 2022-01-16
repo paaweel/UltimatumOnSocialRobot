@@ -18,7 +18,7 @@ from optparse import OptionParser
 
 from game import UltimatumGame
 from soundDetector import SoundDetector
-from config import Config
+from config.config import Config
 import csv
 from datetime import datetime
 import subprocess
@@ -58,7 +58,7 @@ class EventsModule(ALModule):
         currentGameAudioCsv = "{2}/v-{0}-{1}.csv".format(
             Config().version.split(".")[0],
             self.currentGameTimestamp,
-            Config().classifierOutputAudioPath,
+            Config().emotionAudioClassifierLogs,
         )
         with open(currentGameAudioCsv, "w") as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=Config().audioHeader)
@@ -67,7 +67,7 @@ class EventsModule(ALModule):
         currentGameVideoCsv = "{2}/v-{0}-{1}.csv".format(
             Config().version.split(".")[0],
             self.currentGameTimestamp,
-            Config().classifierOutputVideoPath,
+            Config().emotionVideoClassifierLogs,
         )
         with open(currentGameVideoCsv, "w") as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=Config().videoHeader)

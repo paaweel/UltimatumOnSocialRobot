@@ -2,16 +2,17 @@
 
 
 import qi
-from config import Config
+from config.config import Config
 
 from dialogTopic import TopicLoader
+
 
 class Events:
     def __init__(self, tts) -> None:
         self.tts = tts
         self.tts.say("ajm in bicz")
         self.testEventGeneric = qi.Signal()
-        
+
     @qi.bind(returnType=qi.Void, paramsType=[])
     def onNewGame(self):
         print("What up duuude!")

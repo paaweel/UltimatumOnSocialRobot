@@ -1,10 +1,12 @@
 from chatbot_connector import Chatbot
 
-import qi 
+import qi
 from scp import SCPClient
 import paramiko
-# from config import Config
 import speech_recognition as sr
+
+from ..config.config import Config
+
 
 class Speech:
     def __init__(self, app) -> None:
@@ -17,7 +19,9 @@ class Speech:
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         ssh.load_system_host_keys()
-        ssh.connect(hostname="nao.local", username="xxx", password="xxxxx") # TODO: secrets
+        ssh.connect(
+            hostname="nao.local", username="xxx", password="xxxxx"
+        )  # TODO: secrets
         self.scp = SCPClient(ssh.get_transport())
 
     def listen(self):
@@ -26,13 +30,15 @@ class Speech:
         self.audio_recorder.stopMicrophonesRecording()
         print("[INFO]: Speech recognition is in progress. Say something.")
         try:
-            self.audio_recorder.startMicrophonesRecording("/home/nao/speech.wav", "wav", 48000, (0, 0, 1, 0))
+            self.audio_recorder.startMicrophonesRecording(
+                "/home/nao/speech.wav", "wav", 48000, (0, 0, 1, 0)
+            )
             print("[INFO]: Robot is listening to you")
             self.blink_eyes([255, 255, 0])
             while True:
                 pass
         except KeyboardInterrupt:
-            pass    
+            pass
 
         try:
             self.audio_recorder.stopMicrophonesRecording()
@@ -55,10 +61,9 @@ class Speech:
         with sr.AudioFile("/tmp/" + audio_file) as source:
             audio = r.record(source)  # read the entire audio file
 
-        text = r.recognize_google(audio, language='pl-PL')
+        text = r.recognize_google(audio, language="pl-PL")
         print(text)
         return text
-        
 
     def download_file(self, file_name):
         """
@@ -72,13 +77,15 @@ class Speech:
         self.scp.close()
 
     def blink_eyes(self, rgb):
-        self.led_service.fadeRGB('AllLeds', rgb[0], rgb[1], rgb[2], 1.0)
+        self.led_service.fadeRGB("AllLeds", rgb[0], rgb[1], rgb[2], 1.0)
+
 
 if __name__ == "__main__":
-    # bot = Chatbot()
-    app = qi.Application(url="tcp://nao.local")
+    c = Config()
 
-    app.start()
-    s = Speech(app)
-    s.blink_eyes([255, 0, 255])
-    
+    # bot = Chatbot()
+    # app = qi.Application(url="tcp://nao.local")
+
+    # app.start()
+    # s = Speech(app)
+    # s.blink_eyes([255, 0, 255])

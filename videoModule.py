@@ -8,7 +8,7 @@ import logging
 import sys
 import os
 
-from config import Config
+from config.config import Config
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
 

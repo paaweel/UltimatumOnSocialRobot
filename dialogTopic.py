@@ -3,7 +3,7 @@
 
 import qi
 import sys
-from config import Config
+from config.config import Config
 
 
 class TopicLoader:
@@ -15,7 +15,7 @@ class TopicLoader:
         self.load_topic()
 
     def load_topic(self):
-        
+
         self.ALDialog.setLanguage(Config().language)
         self.ALDialog.setASRConfidenceThreshold(0.2)
 

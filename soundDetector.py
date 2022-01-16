@@ -4,7 +4,7 @@ import argparse
 import sys
 import os
 from datetime import datetime
-from config import Config
+from config.config import Config
 
 
 class SoundDetector:

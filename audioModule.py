@@ -8,7 +8,7 @@ import os
 from tensorflow.keras.models import model_from_json
 import sys
 import csv
-from config import Config
+from config.config import Config
 import glob
 
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
@@ -60,7 +60,7 @@ class AudioModule:
             "AUDIO {0}: {1} -> {2}".format(path, predictedEmotion, predictions)
         )
         currentGameAudioCsv = sorted(
-            glob.glob(Config().classifierOutputAudioPath + "/*"), key=os.path.getmtime
+            glob.glob(Config().emotionAudioClassifierLogs + "/*"), key=os.path.getmtime
         )[-1]
         with open(currentGameAudioCsv, "a") as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=Config().audioHeader)

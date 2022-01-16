@@ -1,6 +1,6 @@
 import qi
 import sys
-from config import Config
+from config.config import Config
 
 
 class AnimationPlayer:
@@ -16,7 +16,7 @@ if __name__ == "__main__":
     session = qi.Session()
 
     try:
-        session.connect("tcp://" + Config().ip)
+        session.connect(Config().fullIp)
         animation_player_service = session.service("ALAnimationPlayer")
         tagToAnims = {}
         tagToAnims["myNewTag1"] = [

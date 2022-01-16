@@ -4,7 +4,8 @@ Prompts what to say during HRI.
 """
 
 import qi
-from config import Config
+from config.config import Config
+
 
 def main():
     """
